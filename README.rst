@@ -12,7 +12,7 @@ Install
 --------------
 The recommended installation method is via pip:
 
-pip install necpdsdk
+pip install nec_pd_sdk
 
 License
 --------------
