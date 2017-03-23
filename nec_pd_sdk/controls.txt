@@ -1,0 +1,371 @@
+# NEC Large-screen opcode control definitions
+# Revision 170317
+# Copyright (C) 2016-17 NEC Display Solutons, Ltd.
+# maintained by Will Hollingworth
+# See LICENSE.rst for details.
+#
+0004,"Reset|Factory Reset",1,1,"Execute"
+0006,"Reset|Geometry Reset",1,1,"Execute"
+0008,"Reset|Color Reset",1,1,"Execute"
+000E,"Adjust|Clock",0
+0010,"Picture|Brightness",0
+0012,"Picture|Contrast",0,"Low","High"
+0014,"Picture|Color|Select Color Preset",1,9,"10000K",11,"User 1",2,"Native"
+0016,"Picture|Color|Gain|Red Gain",0
+0018,"Picture|Color|Gain|Green Gain",0
+001A,"Picture|Color|Gain|Blue Gain",0
+001E,"Adjust|Auto Setup",1,1,"Execute"
+0020,"Adjust|H Position",0,"Left","Right"
+0030,"Adjust|V Position",0,"Bottom","Top"
+003E,"Adjust|Clock Phase",0
+0054,"Picture|Color|Color Temp",0,"2600K","10000K"
+0060,"Input",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+0062,"Audio|Audio Volume",0
+0068,"OSD|OSD Language",1,1,"English",2,"German",3,"French",4,"Spanish",5,"Japanese",6,"Italian",7,"Swedish",9,"Russian",14,"Chinese"
+008A,"Picture|Color|Saturation",0,"Pale","Saturated"
+008B,"TV Channel",1,1,"Up",2,"Down"
+008C,"Picture|Sharpness",0,"Soft","Sharp"
+008D,"Audio|Mute",1,0,"Unmute (Set only)",1,"Mute",2,"Unmute"
+008F,"Audio|Audio Treble",0
+0090,"Picture|Color|Tint",0,"Purplish","Greenish"
+0091,"Audio|Audio Bass",0
+0092,"Picture|Black Level",0,"Dark","Bright"
+0093,"Audio|Audio Balance",0,"Left","Right"
+0094,"Audio|Audio Channel Mode",1,0,"Disabled",1,"Mono",2,"Stereo",3,"Expanded"
+009B,"Picture|Color|6 Axis Color Red",0,"Magenta","Yellow"
+009C,"Picture|Color|6 Axis Color Yellow",0,"Red","Green"
+009D,"Picture|Color|6 Axis Color Green",0,"Yellow","Cyan"
+009E,"Picture|Color|6 Axis Color Cyan",0,"Green","Blue"
+009F,"Picture|Color|6 Axis Color Blue",0,"Cyan","Magenta"
+00A0,"Picture|Color|6 Axis Color Magenta",0,"Blue","Red"
+00B0,"Settings",1,1,"Store Current",2,"Restore Factory"
+00B6,"Monitor Type (read only)",1,1,"CRT (SM)",2,"CRT (AG)",3,"TFT LCD"
+00D6,"Power Mode (read only)",1,1,"On",2,"Standby",3,"Suspend",4,"Off"
+00DA,"Scan Mode",1,1,"Over-scan",2,"Under-scan"
+00DF,"VCP Version (read only)",0
+00E1,"Power Save",1,0,"Off",1,"On"
+00FA,"Total Operating Time (30 min) (read only)",0
+00FB,"Key Lock",1,0,"Unlock",1,"Lock"
+00FC,"OSD|OSD Turn Off Delay",0,"","x5 sec"
+00FF,"Operating Time On (30 min) (read only)",0
+021A,"Picture|Picture Mode",1,1,"sRGB",3,"Hi-Bright",4,"Standard",5,"Cinema",6,"ISF-Day",7,"ISF-Night",8,"Custom 1",9,"Custom 2",11,"Ambient-1",12,"Ambient-2",13,"SVE-1",14,"SVE-2",15,"SVE-3",16,"SVE-4",17,"SVE-5"
+021F,"Picture|Color|Color",0,"Pale","Saturated"
+0220,"Picture|Noise Reduction",0,"Off","High"
+0221,"Color System",1,1,"NTSC",2,"PAL",3,"SECAM",4,"Auto",5,"4.43NTSC",6,"PAL-60"
+0223,"Picture|Film Mode",1,1,"Off",2,"Auto"
+0225,"Scan Conversion",1,1,"Off (Interlace)",2,"Enable (IP On/Progressive)"
+0226,"Noise Reduction",0
+022B,"Off Timer (hours)",0,"Off",24,"24 Hours"
+022C,"Audio|MTS Audio",1,1,"Main",2,"Sub",3,"Main + Sub",4,"Stereo",5,"Mono",6,"Dual"
+022D,"Auto Brightness",1,0,"Off",1,"On"
+022E,"Audio|Audio Input",1,1,"Audio 1",2,"Audio 2",3,"Audio 3",4,"HDMI",6,"TV/Option",7,"DisplayPort",8,"DisplayPort 2",10,"HDMI 2",11,"HDMI 3",12,"HDMI 4",13,"Media Player",14,"Compute Module"
+0231,"Reset|Sound Reset",1,1,"Execute"
+0234,"Audio|Surround Sound",1,1,"Off",2,"Low",3,"High"
+0238,"OSD|OSD H Position",0,"Left","Right"
+0239,"OSD|OSD V Position",0,"Down","Up"
+023D,"OSD|Information OSD",0,"Disable","Seconds"
+023E,"Monitor ID",0,"",""
+023F,"IR Control",1,1,"Normal",2,"Primary",3,"Secondary",4,"Lock (Off)"
+0240,"Input Detect",1,0,"First Detect",1,"Last Detect",2,"None",3,"Video Detect",4,"Custom Detect"
+0241,"OSD|OSD Rotation",1,0,"Normal",1,"Rotated"
+0250,"Adjust|H Resolution",0
+0251,"Adjust|V Resolution",0
+0268,"Picture|Gamma",1,1,"Native",4,"2.2",8,"2.4",7,"S Curve",5,"DICOM Sim",6,"Programmable",9,"Option3",11,"sRGB",12,"LStar",13,"Programmable 2",14,"Programmable 3"
+026C,"Adjust|Aspect|Zoom H Expansion",0,"100%","300%"
+026D,"Adjust|Aspect|Zoom V Expansion",0,"100%","300%"
+026F,"Adjust|Aspect|Zoom",0,"100%","300%"
+0270,"Adjust|Aspect|Aspect",1,1,"Normal",2,"Full",3,"Wide",4,"Zoom",5,"Trim",6,"Dynamic",7,"1:1"
+0271,"PIP|PIP Size",1,1,"Small",2,"Middle",3,"Large"
+0272,"PIP|PIP Mode",1,1,"Off",2,"PIP",3,"POP",4,"Still",5,"PBP(1-3) / Side by Side (Aspect)",6,"Side by Side (Full)"
+0273,"PIP|PIP Input (Sub Input)",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3",20,"USB",128,"DisplayPort 3"
+0274,"PIP|PIP H Position",0,"Left","Right"
+0275,"PIP|PIP V Position",0,"Bottom","Top"
+0276,"Still Capture",1,0,"Off",1,"Capture"
+0278,"Select Temperature Sensor",1,1,"Sensor #1",2,"Sensor #2",3,"Sensor #3"
+0279,"Read Temperature Sensor (read only)",0
+027A,"Fan|Fan Select",1,1,"Fan 1",2,"Fan 2",3,"Fan 3",4,"Fan 1+2",5,"Fan 1+2+3"
+027B,"Fan|Fan Status (read only)",1,0,"Off",1,"On",2,"Error"
+027D,"Fan|Fan Control",1,1,"Auto (No offset)",2,"Forced On",3,"Auto (offset -2)",4,"Auto (offset -4)",5,"Auto (offset -6)",6,"Auto (offset -8)",7,"Auto (offset -10)"
+028D,"Picture|Adaptive Contrast",1,1,"Off",2,"Low",3,"Middle",4,"High"
+029A,"Standby Mode",1,1,"Standby",2,"ECO Standby"
+029E,"SCART Mode",1,0,"Off",1,"On"
+02B3,"SpectraView Engine|Luminance set",0
+02B4,"Current Luminance (read only)",0
+02B5,"Bright Sensor Read (read only)",0
+02B8,"OSD|OSD Transparency",1,1,"Off (Opaque)",2,"Type 1",3,"Type 2"
+02BE,"Power LED Indicator",1,1,"On",2,"Off"
+02C3,"Test Pattern|VT Mode",1,1,"Normal",2,"VT Mode"
+02CA,"CSC Gain",0
+02CB,"Reset|Menu Tree Reset",1,1,"Factory Reset WARNING!!!",2,"Reset Picture",3,"Reset Adjust",4,"Reset Audio",5,"Reset Schedule",6,"Reset PIP",7,"Reset OSD",8,"Reset Multi Display",9,"Reset Display Protection",10,"Reset Advanced Option",11,"Reset Advanced Option 2",12,"Reset External Control",13,"Reset Remote Control"
+02CC,"Adjust|Aspect|Zoom H Position",0,"Left Side","Right Side"
+02CD,"Adjust|Aspect|Zoom V Position",0,"Down Side","Up Side"
+02CE,"Adjust|Aspect|Base Zoom",1,1,"Off",2,"Custom",3,"16:9-Zoom",4,"14:9-Zoom",5,"Dynamic"
+02CF,"DVI Mode",1,1,"DVI-PC",2,"DVI-HD"
+02D0,"Tile Matrix|Tile Matrix # H Monitors",0,"",""
+02D1,"Tile Matrix|Tile Matrix # V Monitors",0,"",""
+02D2,"Tile Matrix|Tile Matrix Position",0,"Top Left","Bottom Right"
+02D3,"Tile Matrix|Tile Matrix Mode",1,1,"Disable (Off) and display frame",2,"Enable (On)",3,"Disable (Off) and hide frame"
+02D5,"Tile Matrix|Tile Matrix Tile Comp",1,1,"Disable (Off)",2,"Enable (On)"
+02D6,"Video (AV Input) Power Save",1,1,"Disable",2,"Enable"
+02D7,"Image Flip",1,1,"None",2,"H Flip",3,"V Flip",4,"180 Rotate"
+02D8,"Power On Delay",0,"Off","Seconds"
+02DA,"Adjust|Input Resolution",1,1,"Auto",2,"1024x768",3,"1280x768",4,"1360x768",5,"1366x768",6,"1400x1050",7,"1680x1050"
+02DB,"Screen Saver|Screen Saver Gamma",1,1,"Normal",2,"On"
+02DC,"Screen Saver|Screen Saver Brightness",1,1,"Normal",2,"Decrease Brightness"
+02DD,"Screen Saver|Screen Saver Motion",0,"Off","x10 Seconds"
+02DF,"Side Border Color",0,"Black","White"
+02E1,"Long Cable|Manual Sync Terminate",1,1,"Hi (2.2 kOhm)",2,"Lo (75 Ohm)"
+02E3,"Scan Mode",1,1,"Under-scan",2,"Over-scan",3,"Auto"
+02E4,"Reset|Advanced Option Reset",1,1,"Execute"
+02E5,"Enable Schedule",1,1,"Schedule #1",2,"Schedule #2",3,"Schedule #3",4,"Schedule #4",5,"Schedule #5",6,"Schedule #6",7,"Schedule #7"
+02E6,"Disable Schedule",1,1,"Schedule #1",2,"Schedule #2",3,"Schedule #3",4,"Schedule #4",5,"Schedule #5",6,"Schedule #6",7,"Schedule #7"
+02E8,"SpectraView Engine|Custom Gamma Value",0
+02EA,"Signal Information",1,1,"Off",2,"On"
+02EE,"Uniformity Correction Level",0,"Min","Max"
+02F0,"Long Cable|Comp DVI",1,1,"Mode 0",2,"Mode 1",3,"Mode 2",4,"Mode 3"
+02F8,"Reset|Gamma Programmable Reset",1,1,"Execute"
+02F9,"Gamma Programmable LUT Size",1,1,"8 bit",2,"10 bit"
+1000,"ISF",1,1,"Off",2,"On"
+1001,"ISF Mode",1,1,"ISF-Day",2,"ISF-Night",17,"ISF-Day (not adjusted)",18,"ISF-Night (not adjusted)"
+1002,"ISF Data Copy",1,1,"Execute"
+1008,"PIP|Text Ticker Mode",1,1,"Off",2,"Horizontal",3,"Vertical"
+1009,"PIP|Text Ticker Position",0,"Top/Left","Bottom/Right"
+100A,"PIP|Text Ticker Size",0,"Narrow","Wide"
+100B,"PIP|Text Ticker Blend",0,"10%","100%"
+100C,"PIP|Text Ticker Detect",1,1,"Auto",2,"Off"
+100D,"PIP|Text Ticker Fade In",1,1,"On",2,"Off"
+1010,"Carbon Footprint (g) (read only)",0
+1011,"Carbon Footprint (kg) (read only)",0
+1026,"Carbon Usage (g) (read only)",0
+1027,"Carbon Usage (kg) (read only)",0
+1028,"Carbon Footprint Savings No Reset (g) (read only)",0
+1029,"Carbon Footprint Savings No Reset (kg) (read only)",0
+102A,"Carbon Usage No Reset (g) (read only)",0
+102B,"Carbon Usage No Reset (kg) (read only)",0
+102E,"Custom Detect Priority 1",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+102F,"Custom Detect Priority 2",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1030,"Custom Detect Priority 3",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1031,"Custom Detect Priority 4",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1032,"Custom Detect Priority 5",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1033,"Ambient Brightness Low",0,"Dark","Bright"
+1034,"Ambient Brightness High",0,"Dark","Bright"
+1035,"Screen Saver|Screen Saver Zoom",0
+1036,"Long Cable|Comp Manual Pole",0
+1037,"Long Cable|Comp Manual Peak",0
+1038,"Long Cable|Comp Manual Gain",0
+1039,"Long Cable|Comp Manual Offset",0
+103A,"Test Pattern|Test Pattern Red Level",0,"Dark","Bright"
+103B,"Test Pattern|Test Pattern Green Level",0,"Dark","Bright"
+103C,"Test Pattern|Test Pattern Blue Level",0,"Dark","Bright"
+103D,"Long Cable|Comp Manual Equalize",1,1,"Off",2,"On"
+103E,"External Control|External Control",1,1,"RS232C",2,"LAN"
+103F,"Fan|Fan Speed",1,1,"High",2,"Low"
+1040,"HDMI Signal",1,1,"Expand",2,"Raw"
+1041,"OPS|Option Slot Power",1,1,"Off (linked)",2,"On",3,"Auto"
+1049,"EDID Switch",1,1,"Timing 1 (1280x768@60Hz)",2,"Timing 2 (1360x768@60Hz)",3,"Timing 3 (1366x768@60Hz)",4,"Timing 4 (1920x1080@60Hz)"
+104A,"Tile Matrix|Tile Matrix Memory",1,1,"Common for all inputs",2,"Per Input"
+1050,"SpectraView Engine|Picture Mode",1,1,"Programmable 1",2,"Programmable 2",3,"Programmable 3",4,"Programmable 4",5,"Programmable 5"
+1051,"SpectraView Engine|Preset",1,1,"sRGB",2,"AdobeRGB",3,"DCI",4,"REC-Bt709",5,"High Bright",6,"Full",7,"DICOM",8,"Programmable 1",9,"Programmable 2",10,"Programmable 3",11,"Programmable 4",12,"Programmable 5",13,"eciRGB v2"
+1052,"SpectraView Engine|Target White Point CIE x (x1000)",0
+1053,"SpectraView Engine|Target White Point CIE y (x1000)",0
+1054,"SpectraView Engine|Black Level (x10)",0
+1055,"SpectraView Engine|Target Colorspace Red CIE x (x1000)",0
+1056,"SpectraView Engine|Target Colorspace Red CIE y (x1000)",0
+1057,"SpectraView Engine|Target Colorspace Green CIE x (x1000)",0
+1058,"SpectraView Engine|Target Colorspace Green CIE y (x1000)",0
+1059,"SpectraView Engine|Target Colorspace Blue CIE x (x1000)",0
+105A,"SpectraView Engine|Target Colorspace Blue CIE y (x1000)",0
+105B,"SpectraView Engine|Color Vision Emulation",1,1,"Off",2,"Type P",3,"Type D",4,"Type T",5,"Grayscale"
+105C,"SpectraView Engine|Metamerism",1,1,"Off",2,"On"
+1069,"SpectraView Engine|Print Preview (3D LUT)",1,1,"Off",2,"On"
+106B,"SpectraView Engine|3D LUT/Prog Gamma Select",1,1,"Programmable 1",2,"Programmable 2",3,"Programmable 3",4,"Programmable 4",5,"Programmable 5"
+1070,"SpectraView Engine|Reset Picture Mode",1,1,"Reset"
+1071,"SpectraView Engine|Target Colorspace Reset",1,1,"Reset"
+1075,"Human Sensing|Human Sensing Mode",1,1,"Disable",2,"Auto Off",3,"Deep",4,"Custom"
+1076,"Human Sensing|Human Sensing Reading",0
+1077,"Human Sensing|Human Sensing Threshold",0
+1078,"Human Sensing|Human Sensing Start Time",0
+107E,"BNC Mode",1,1,"RGB Mode (Default)",2,"PComponent",3,"Video"
+107F,"Group ID",0
+1080,"Audio|PIP Audio",1,1,"Main",2,"Sub",3,"Window 1",4,"Window 2",5,"Window 3",6,"Window 4"
+1081,"Audio|Audio Line Out",1,1,"Fixed",2,"Variable"
+1082,"PIP|Keep PIP Mode",1,1,"Off",2,"On"
+1083,"PIP|PIP Aspect",1,1,"Normal",2,"Full",3,"Wide",4,"Zoom",5,"Trim",6,"Expand"
+1084,"Closed Caption",1,1,"Off",2,"CC1",3,"CC2",4,"CC3",5,"CC4",6,"TT1",7,"TT2",8,"TT3",9,"TT4"
+1085,"External Control|ID All Reply",1,1,"On",2,"Off"
+1086,"Input Change",1,1,"Normal",2,"Quick",3,"SuperQuick"
+1087,"Motion Compensation (120Hz)",1,1,"On",2,"Off"
+1088,"Edge Compensation (Mura)",1,1,"On",2,"Off"
+1089,"OSD|OSD Off",1,1,"On",2,"Off"
+108A,"Shutdown",1,1,"Off",2,"On"
+108B,"Option LAN Alert",1,1,"Off",2,"On"
+108C,"Edge Comp Type",1,1,"Type 1",2,"Type 2",3,"Type 3"
+108D,"Edge Comp Brightness",1,1,"10%",2,"20%",3,"30%",4,"40%"
+108E,"D-SUB Mode",1,1,"RGB",2,"Component"
+1095,"OSD|Display ID on OSD",1,0,"Off",1,"On"
+1098,"Expert Analog Video|ADC Offset Base Red",0,"Dark","Bright"
+1099,"Expert Analog Video|ADC Offset Base Green",0,"Dark","Bright"
+109A,"Expert Analog Video|ADC Offset Base Blue",0,"Dark","Bright"
+109B,"Expert Analog Video|ADC Offset Red",0,"Dark","Bright"
+109C,"Expert Analog Video|ADC Offset Green",0,"Dark","Bright"
+109D,"Expert Analog Video|ADC Offset Blue",0,"Dark","Bright"
+109E,"Expert Analog Video|ADC Gain Red",0,"Dark","Bright"
+109F,"Expert Analog Video|ADC Gain Green",0,"Dark","Bright"
+10A0,"Expert Analog Video|ADC Gain Blue",0,"Dark","Bright"
+10A1,"Digital Closed Caption",1,1,"Off",2,"Service1",3,"Service2",4,"Service3",5,"Service4",6,"Service5",7,"Service6"
+10AD,"Audio|Audio Volume Step",1,1,"Increment",2,"Decrement"
+10B0,"Audio|Option Slot Audio",1,1,"Analog",2,"Digital"
+
+10B5,"PIP|PBP Type",1,1,"PBP1=2 Windows",2,"PIP=2 Windows",3,"PIP=3 Windows / PBP1=3 Windows",4,"PBP2=3 Windows",5,"PBP3=3 Windows",6,"PBP1=4 Windows"
+
+10B6,"Screen Mute",1,1,"On",2,"Off"
+10B7,"Auto Adjust",1,1,"Off",2,"On"
+10B8,"OSD|OSD Flip",1,1,"Off",2,"On"
+10B9,"PIP|PIP Size (Variable)",0,"Small","Large"
+10BA,"Memo Display",1,1,"On",2,"Off"
+10BC,"Power On Delay - Link to ID",1,1,"Off",2,"On"
+10BE,"DDCI",1,1,"Disable",2,"Enable"
+10C0,"OPS|Internal PC Off Warning",1,1,"Off",2,"On"
+10C1,"OPS|Internal PC Auto Off",1,1,"Off",2,"On"
+10C2,"OPS|Internal PC Start",1,1,"Execute"
+10C3,"OPS|Internal PC Force Quit",1,1,"Execute"
+10C4,"Touch Panel Power Supply",1,1,"Off",2,"On"
+10C5,"Touch Panel PC Source",1,1,"Auto",2,"External PC"
+10C6,"Human Sensing|Human Sensing Backlight",0,"Dark","Bright"
+10C7,"Human Sensing|Human Sensing Volume",0
+10C8,"Room Light Sensing",1,1,"Off",2,"Mode 1",3,"Mode 2"
+10C9,"Room Ambient Brightness Max",0
+10CA,"Audio|Audio Delay SW",1,1,"Off",2,"On"
+10CB,"Audio|Audio Delay",0,"Short","Long"
+10CE,"Input Change Super Input 1",1,0,"-",1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+10CF,"Input Change Super Input 2",1,0,"-",1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+10D0,"Human Sensing|Human Sensing Input",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+10D2,"Power Save Timer",1,1,"Off",2,"On (Auto Standby)"
+10D3,"LAN Power",1,1,"Off",2,"On"
+10D4,"IR Lock|IR Lock Settings Mode Select",1,1,"Unlock",2,"Lock All",3,"Custom Lock"
+10D5,"IR Lock|IR Lock Settings Power",1,1,"Unlock",2,"Lock"
+10D6,"IR Lock|IR Lock Settings Volume",1,1,"Unlock",2,"Lock"
+10D7,"IR Lock|IR Lock Settings Min Volume",0
+10D8,"IR Lock|IR Lock Settings Max Volume",0
+10D9,"IR Lock|IR Lock Settings Input",1,1,"Unlock",2,"Lock"
+10DA,"IR Lock|IR Lock Settings Unlock Select 1",1,0,"-",1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+10DB,"IR Lock|IR Lock Settings Unlock Select 2",1,0,"-",1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+10DC,"IR Lock|IR Lock Settings Unlock Select 3",1,0,"-",1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+
+10DD,"Human Sensing|Human Sensing Backlight On/Off",1,1,"Off",2,"On"
+10DE,"Human Sensing|Human Sensing Volume On/Off",1,1,"Off",2,"On"
+10DF,"Human Sensing|Human Sensing Input On/Off",1,1,"Off",2,"On"
+10E0,"Fan|Fan Control Sensor 1 Set Temperature",0
+10E1,"Fan|Fan Control Sensor 1 Temperature from max",0
+10E2,"Fan|Fan Control Sensor 2 Set Temperature",0
+10E3,"Fan|Fan Control Sensor 2 Temperature from max",0
+10E4,"Fan|Fan Control Sensor 3 Set Temperature",0
+10E5,"Fan|Fan Control Sensor 3 Temperature from max",0
+10EA,"Video Loop Out Setting",1,1,"On",2,"Off"
+10EC,"Intelligent Wireless Data",1,1,"Off",2,"On"
+10EE,"RF-Tag Destination ID (read only)",1,0,"World Wide",1,"North America",2,"Europe",3,"China",4,"Japan",5,"Taiwan"
+10EF,"Bowling Mode",1,1,"Off",2,"On"
+10F0,"Human Sensing|Human Sensor attachment status (read only)",1,1,"Not installed",2,"Installed"
+10F1,"DisplayPort Terminal Select",1,1,"DisplayPort 1",2,"DisplayPort 2",3,"DisplayPort 3"
+10F2,"DisplayPort Terminal Type",1,1,"1.1a",2,"1.2"
+10F5,"Extended Power Save",1,1,"Disable",2,"Auto Power Save",3,"Auto Standby"
+10F6,"Auto Power Save Time (sec x5)",0
+10F7,"Auto Standby Time (sec x5)",0
+1101,"Tile Matrix|Frame Comp Mode",1,1,"None",2,"Auto",3,"Manual"
+1102,"Tile Matrix|Frame Comp Auto Value",1,200,"2.0",150,"1.5",100,"1.0",50,"0.5"
+1103,"Tile Matrix|Frame Comp Manual Value",1,25,"0.25",50,"0.50",75,"0.75",100,"1.00",125,"1.25",150,"1.50",175,"1.75",200,"2.00"
+1104,"Tile Matrix|V Scan Reverse Mode",1,1,"None",2,"Auto",3,"Manual"
+1105,"Tile Matrix|V Scan Reverse Manual",1,1,"Non Reverse",2,"Reverse"
+
+1106,"Input (Alt)",1,3,"DVI1",4,"DVI2",13,"Option",15,"Display Port",16,"Display Port 2",17,"HDMI1",18,"HDMI2",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1109,"UHD Upscaling",1,1,"Off",2,"Low",3,"Mid",4,"High"
+110B,"PIP|Active Window",1,1,"Window 1",2,"Window 2",3,"Window 3",4,"Window 4"
+110D,"PIP|Active Frame",1,1,"Off",2,"On"
+110E,"PIP|Input Select Window 1",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+110F,"PIP|Input Select Window 2",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1110,"PIP|Input Select Window 3",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1111,"PIP|Input Select Window 4",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1112,"PIP|Pivot Window 1",1,1,"Off",2,"Rotate 90"
+1113,"PIP|Pivot Window 2",1,1,"Off",2,"Rotate 90"
+1114,"PIP|Pivot Window 3",1,1,"Off",2,"Rotate 90"
+1115,"PIP|Pivot Window 4",1,1,"Off",2,"Rotate 90"
+1116,"PIP|Pivot All Windows",1,1,"Off",2,"Rotate 90"
+
+1117,"OSD|Communications Information",1,1,"Off",2,"On"
+
+1118,"HDMI/DVI Select",1,1,"HDMI",2,"DVI",3,"Combo HDMI/DVI"
+1119,"Display Port Bit Rate",1,1,"RBR",2,"HBR",3,"HBR2"
+111A,"Long Cable|Comp DVI2",1,1,"Mode 0",2,"Mode 1",3,"Mode 2",4,"Mode 3"
+111B,"Long Cable|Comp HDMI1",1,1,"Mode 0",2,"Mode 1",3,"Mode 2",4,"Mode 3"
+111C,"Long Cable|Comp HDMI2",1,1,"Mode 0",2,"Mode 1",3,"Mode 2",4,"Mode 3"
+111D,"Long Cable|Comp HDMI3",1,1,"Mode 0",2,"Mode 1",3,"Mode 2",4,"Mode 3"
+111E,"Long Cable|Comp HDMI4",1,1,"Mode 0",2,"Mode 1",3,"Mode 2",4,"Mode 3"
+
+111F,"Input Configuration|Preset 1 Mode",1,1,"Off",2,"Left & Right",3,"Top & Bottom"
+1120,"Input Configuration|Preset 2 Mode",1,1,"Off",2,"Left & Right",3,"Top & Bottom"
+1121,"Input Configuration|Preset 3 Mode",1,1,"Off",2,"Left & Right",3,"Top & Bottom"
+1122,"Input Configuration|Top Left",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1123,"Input Configuration|Top Right",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1124,"Input Configuration|Bottom Left",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1125,"Input Configuration|Bottom Right",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1126,"Input Configuration|Left",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1127,"Input Configuration|Right",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1128,"Input Configuration|Top",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+1129,"Input Configuration|Bottom",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+
+112A,"Text Ticker|Window 1",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+112B,"Text Ticker|Window 2",1,1,"VGA",2,"RGB/HV",3,"DVI",4,"DVI2",5,"Video1",6,"Video2",7,"S-Video",10,"TV",12,"DVD/HD1",13,"Option",14,"DVD/HD2",15,"Display Port",16,"Display Port 2",17,"HDMI",18,"HDMI2",19,"HDMI3(E series)",20,"USB",128,"DisplayPort 3",130,"HDMI3",131,"HDMI4",132,"PRESET1",133,"PRESET2",134,"PRESET3",135,"Media Player",136,"Compute Module"
+
+112C,"Adjust|Aspect|Extension Zoom",0
+112D,"Adjust|Aspect|Extension H Zoom",0
+112E,"Adjust|Aspect|Extension V Zoom",0
+
+1147,"SpectraView Engine|SpectraView Engine Mode",1,1,"Off",2,"On"
+
+114C,"Human Sensing|Human Sensor Status",1,1,"No detect",2,"Detected"
+114F,"Command Transfer",1,1,"Off",2,"On"
+1157,"OSD|Close OSD",1,1,"Close"
+1162,"Slot 2 CH Setting",1,1,"Auto",2,"1ch",3,"2ch"
+1163,"Slot 2 CH Select",1,1,"HDMI",2,"DisplayPort"
+1167,"Multi Input|Terminal Settings|DisplayPort",1,1,"SST",2,"MST"
+1168,"Multi Input|Terminal Settings|HDMI",1,1,"Mode1 (1.4)",2,"Mode2 (2.0)"
+1169,"Control|IR Lock Settings|Channel",1,1,"Unlock",2,"Lock"
+116A,"Control|Key Lock Settings|Mode Select",1,1,"Unlock",2,"Lock All"
+116B,"Control|Key Lock Settings|Power",1,1,"Unlock",2,"Lock"
+116C,"Control|Key Lock Settings|Volume",1,1,"Unlock",2,"Lock"
+116D,"Control|Key Lock Settings|Min Volume",0
+116E,"Control|Key Lock Settings|Max Volume",0
+116F,"Control|Key Lock Settings|Input",1,1,"Unlock",2,"Lock"
+1170,"Control|Key Lock Settings|Channel",1,1,"Unlock",2,"Lock"
+1171,"Control|Power Indicator|Schedule Indicator",1,1,"Off",2,"On"
+1172,"Control|USB|USB Touch Power",1,1,"Off",2,"On"
+1173,"Control|USB|USB External Control",1,1,"Disable",2,"Enable"
+1174,"Control|USB|USB PC Source",1,1,"Auto",2,"External PC",3,"Internal PC",4,"Compute Module"
+1175,"Control|USB|USB Power",1,1,"On",2,"Auto"
+1176,"Control|CEC",1,1,"Off",2,"On"
+1177,"Control|CEC Auto Turn Off",1,1,"No",2,"Yes"
+1178,"Control|CEC Audio Receiver",1,1,"No",2,"Yes"
+1179,"Control|CEC Search Device",1,1,"No",2,"Yes"
+117A,"OSD|Key Guide",1,1,"Off",2,"On"
+117B,"Power Save Message",1,1,"Off",2,"On"
+117C,"Compute Module|Power Supply",1,1,"Off",2,"On"
+117D,"Compute Module|Auto Power On",1,1,"Disable",2,"Enable"
+117E,"Compute Module|USB Boot Mode",1,1,"Disable",2,"Enable"
+117F,"Compute Module|IR Signal",1,1,"Disable",2,"Enable"
+1180,"Compute Module|Monitor Control",1,1,"Disable",2,"Enable"
+1181,"Compute Module|Shutdown Signal",1,1,"Disable",2,"Enable"
+1182,"Compute Module|Power Supply Off Delay",0,"","sec"
+1183,"DP Power setting",1,1,"Off",2,"On",3,"Auto"
+1184,"Dual Link HDCP SW",1,1,"1",2,"2"
+1185,"Internal Touch",1,1,"Disable",2,"Enable"
+1186,"HDMI SW Through",1,1,"Off",2,"On"
+119B,"Compute Module|Watchdog Timer|Enable",1,1,"Disable",2,"Enable"
+119C,"Compute Module|Watchdog Timer|Start Up Time (sec x10)",0
+119D,"Compute Module|Watchdog Timer|Period Time (sec x10)",0
+119E,"Compute Module|Watchdog Timer|Reset",1,0,"Disabled",1,"Reset/Run",2,"Stop"
+
+11FA,"Total Operating Time (upper) (minutes) (read only)",0
+11FB,"Total Operating Time (lower) (minutes) (read only)",0
+11FE,"Operating Time On (upper) (minutes) (read only)",0
+11FF,"Operating Time On (lower) (minutes) (read only)",0
+
