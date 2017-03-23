@@ -17,5 +17,5 @@ The source code is available to clone at: https://github.com/NECDisplaySolutions
 
 Contributors
 ^^^^^^^^^^^^
-* Will Hollingsworth
+* Will Hollingworth
 * Tammy Marr
