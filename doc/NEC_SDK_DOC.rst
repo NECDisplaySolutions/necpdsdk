@@ -4,7 +4,7 @@ NAME
     nec_pd_sdk - nec_pd_sdk.py - High level functions for communicating via LAN or RS232 with NEC large-screen displays.
 
 FILE
-    c:\development\python projects\necpdsdk\nec_pd_sdk\nec_pd_sdk.py
+    \nec_pd_sdk\nec_pd_sdk.py
 
 DESCRIPTION
     Revision: 170322

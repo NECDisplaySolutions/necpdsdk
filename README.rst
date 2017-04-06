@@ -14,6 +14,10 @@ The recommended installation method is via pip:
 
 pip install nec_pd_sdk
 
+OR for python3:
+
+pip3 install nec_pd_sdk
+
 License
 --------------
 The MIT License

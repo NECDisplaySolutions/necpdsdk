@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """nec_pd_sdk.py - High level functions for communicating via LAN or RS232 with NEC large-screen displays.
 
-Revision: 170322
 """
 #
 #

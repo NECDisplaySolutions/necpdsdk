@@ -4,7 +4,7 @@ NAME
     protocol
 
 FILE
-    c:\development\python projects\necpdsdk\nec_pd_sdk\protocol.py
+    \nec_pd_sdk\protocol.py
 
 DESCRIPTION
     protocol.py - Lower level protocol handling functions for communicating with NEC large-screen displays

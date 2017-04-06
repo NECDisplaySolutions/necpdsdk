@@ -4,7 +4,7 @@ NAME
     constants
 
 FILE
-    c:\development\python projects\necpdsdk\nec_pd_sdk\constants.py
+   \nec_pd_sdk\constants.py
 
 DESCRIPTION
     constants.py - Various constants used for communicating with NEC large-screen displays.
