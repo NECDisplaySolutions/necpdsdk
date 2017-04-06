@@ -18,24 +18,17 @@ Revision: 170322
 # TODO == ATHLON 5 ==
 # schedule, holiday, weekend
 
-from __future__ import unicode_literals
-from __future__ import print_function
+
+
 from collections import namedtuple
 import socket
 import string
 import serial
-import protocol
 import logging
 import time
 import datetime
-from protocol import PDError
-from protocol import PDTimeoutError
-from protocol import PDNullMessageReplyError
-from protocol import PDUnexpectedReplyError
-from protocol import PDCommandNotSupportedError
-from protocol import unexpectedReply
-from protocol import commandStatusReturnedError
-from constants import *
+from .protocol import *
+from .constants import *
 
 
 PDDateTimeTuple = namedtuple('PDDateTimeTuple', ['status',
@@ -345,12 +338,12 @@ class NECPD(object):
         logging.debug('opcode=%04xh', opcode)
         assert 0x0000 <= opcode <= 0xffff
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(opcode))
-        protocol.write_command(self.f,
+        send_data.extend(ascii_encode_value_4_bytes(opcode))
+        write_command(self.f,
                                send_data,
                                self.destination_address,
                                0x43)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 16:
             if reply_message_type != 0x44:
                 logging.error('unexpected reply received')
@@ -358,23 +351,23 @@ class NECPD(object):
             offset = 0
             # result
             parameter_len = 2
-            reply_result = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_result = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # opcode
             parameter_len = 4
-            reply_opcode = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_opcode = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # type
             parameter_len = 2
-            reply_type = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_type = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # max value
             parameter_len = 4
-            reply_max_value = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_max_value = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # current value
             parameter_len = 4
-            reply_current_value = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_current_value = ascii_decode_value(reply_data[offset:offset + parameter_len])
             return PDOpCodeGetSetTuple(result=reply_result,
                                        opcode=reply_opcode,
                                        type=reply_type,
@@ -397,10 +390,10 @@ class NECPD(object):
         assert 0x0000 <= opcode <= 0xffff
         assert 0x0000 <= value <= 0xffff
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(opcode))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(value))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x45)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(opcode))
+        send_data.extend(ascii_encode_value_4_bytes(value))
+        write_command(self.f, send_data, self.destination_address, 0x45)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 16:
             if reply_message_type != 0x46:
                 logging.error('unexpected reply received')
@@ -408,23 +401,23 @@ class NECPD(object):
             offset = 0
             # result
             parameter_len = 2
-            reply_result = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_result = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # opcode
             parameter_len = 4
-            reply_opcode = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_opcode = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # type
             parameter_len = 2
-            reply_type = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_type = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # max value
             parameter_len = 4
-            reply_max_value = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_max_value = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # current value
             parameter_len = 4
-            reply_current_value = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_current_value = ascii_decode_value(reply_data[offset:offset + parameter_len])
             return PDOpCodeGetSetTuple(result=reply_result,
                                        opcode=reply_opcode,
                                        type=reply_type,
@@ -443,22 +436,22 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0x01D6))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0x01D6))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 16:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # result code and power control reply command
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0x0200):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0x0200):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:8] != protocol.ascii_encode_value_4_bytes(0xD600):
+            if reply_data[4:8] != ascii_encode_value_4_bytes(0xD600):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # value parameter
-            state = protocol.ascii_decode_value(reply_data[12:12+4])
+            state = ascii_decode_value(reply_data[12:12+4])
         else:
             logging.error('unexpected reply length: %i (expected 16)', len(reply_data))
             raise unexpectedReply
@@ -475,24 +468,24 @@ class NECPD(object):
         assert 1 <= state <= 4
         logging.debug('state=%i', state)
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0xC2))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0x03D6))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(state))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_2_bytes(0xC2))
+        send_data.extend(ascii_encode_value_4_bytes(0x03D6))
+        send_data.extend(ascii_encode_value_4_bytes(state))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 12:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # result code and power control reply command
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0x00C2):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0x00C2):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:8] != protocol.ascii_encode_value_4_bytes(0x03D6):
+            if reply_data[4:8] != ascii_encode_value_4_bytes(0x03D6):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # value parameter
-            state = protocol.ascii_decode_value(reply_data[8:8 + 4])
+            state = ascii_decode_value(reply_data[8:8 + 4])
         else:
             logging.error('unexpected reply length: %i (expected 12)', len(reply_data))
             raise unexpectedReply
@@ -508,20 +501,20 @@ class NECPD(object):
         logging.debug('')
         send_data = []
         serial_number = ""
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC216))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC216))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 4:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # Serial No. reply command
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC316):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC316):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             pos = 4
             while pos < len(reply_data):
-                x = protocol.ascii_decode_value(reply_data[pos:pos + 2])
+                x = ascii_decode_value(reply_data[pos:pos + 2])
                 if x == 0:
                     break
                 pos += 2
@@ -541,20 +534,20 @@ class NECPD(object):
         logging.debug('')
         send_data = []
         model_name = ""
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC217))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC217))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 4:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # Model Name reply Command
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC317):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC317):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             pos = 4
             while pos < len(reply_data):
-                x = protocol.ascii_decode_value(reply_data[pos:pos + 2])
+                x = ascii_decode_value(reply_data[pos:pos + 2])
                 if x == 0:
                     break
                 pos += 2
@@ -574,20 +567,20 @@ class NECPD(object):
         send_data = []
         result_codes = []
         logging.debug('')
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0xB1))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_2_bytes(0xB1))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 4:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # Model Name reply Command
-            if reply_data[0:2] != protocol.ascii_encode_value_2_bytes(0xA1):
+            if reply_data[0:2] != ascii_encode_value_2_bytes(0xA1):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             pos = 2
             while pos < len(reply_data):
-                x = protocol.ascii_decode_value(reply_data[pos:pos + 2])
+                x = ascii_decode_value(reply_data[pos:pos + 2])
                 pos += 2
                 result_codes.append(x)
         else:
@@ -607,19 +600,19 @@ class NECPD(object):
         version_string = ""
         assert 0 <= fw_type <= 4
         logging.debug('fw_type=%i', fw_type)
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA02))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(fw_type))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA02))
+        send_data.extend(ascii_encode_value_2_bytes(fw_type))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # Firmware Version Read command reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB02):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(fw_type):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(fw_type):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             for x in reply_data[8:]:
@@ -640,15 +633,15 @@ class NECPD(object):
         """
         send_data = []
         logging.debug('')
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x0C))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(_encode_value_2_bytes(0x0C))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 4:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # save current settings Command reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0x000C):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0x000C):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
         else:
@@ -665,28 +658,28 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x07))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_2_bytes(0x07))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 12:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:2] != protocol.ascii_encode_value_2_bytes(0x4E):
+            if reply_data[0:2] != ascii_encode_value_2_bytes(0x4E):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset = 2
             # status_byte
             parameter_len = 2
-            status_byte = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            status_byte = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # h_freq
             parameter_len = 4
-            h_freq = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            h_freq = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # v_freq
             parameter_len = 4
-            v_freq = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            v_freq = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             return status_byte, h_freq, v_freq
         else:
@@ -702,44 +695,44 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC211))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC211))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 18:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC311):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC311):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset = 4
             # year
             parameter_len = 2
-            reply_year = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_year = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # month
             parameter_len = 2
-            reply_month = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_month = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # day
             parameter_len = 2
-            reply_day = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_day = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # weekday
             parameter_len = 2
-            reply_weekday = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_weekday = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # hour
             parameter_len = 2
-            reply_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # minute
             parameter_len = 2
-            reply_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # daylight_savings
             parameter_len = 2
-            reply_daylight_savings = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_daylight_savings = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
         else:
             logging.error('unexpected reply length: %i (expected 18)', len(reply_data))
@@ -779,58 +772,58 @@ class NECPD(object):
                       value.daylight_savings)
 
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC212))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value.year))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value.month))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value.day))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value.weekday))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value.hour))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value.minute))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value.daylight_savings))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC212))
+        send_data.extend(ascii_encode_value_2_bytes(value.year))
+        send_data.extend(ascii_encode_value_2_bytes(value.month))
+        send_data.extend(ascii_encode_value_2_bytes(value.day))
+        send_data.extend(ascii_encode_value_2_bytes(value.weekday))
+        send_data.extend(ascii_encode_value_2_bytes(value.hour))
+        send_data.extend(ascii_encode_value_2_bytes(value.minute))
+        send_data.extend(ascii_encode_value_2_bytes(value.daylight_savings))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 20:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC312):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC312):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset = 4
             # status
             parameter_len = 2
-            reply_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             if reply_status != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             offset += parameter_len
             # year
             parameter_len = 2
-            reply_year = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_year = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # month
             parameter_len = 2
-            reply_month = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_month = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # day
             parameter_len = 2
-            reply_day = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_day = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # weekday
             parameter_len = 2
-            reply_weekday = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_weekday = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # hour
             parameter_len = 2
-            reply_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # minute
             parameter_len = 2
-            reply_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # daylight_savings
             parameter_len = 2
-            reply_daylight_savings = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_daylight_savings = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
         else:
             logging.error('unexpected reply length: %i (expected 20)', len(reply_data))
@@ -856,81 +849,81 @@ class NECPD(object):
         logging.debug('program_no=%i', program_no)
         send_data = []
         assert 0 <= program_no <= 30
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC221))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(program_no))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC221))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 36:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC321):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC321):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset = 4
             # program_no
             parameter_len = 2
-            reply_program_no = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_on_hour
             parameter_len = 2
-            reply_turn_on_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_on_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_on_minute
             parameter_len = 2
-            reply_turn_on_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_on_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_off_hour
             parameter_len = 2
-            reply_turn_off_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_off_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_off_minute
             parameter_len = 2
-            reply_turn_off_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_off_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # timer_input
             parameter_len = 2
-            reply_timer_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_timer_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # week_setting
             parameter_len = 2
-            reply_week_setting = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_week_setting = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # option
             parameter_len = 2
-            reply_option = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_option = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture_mode
             parameter_len = 2
-            reply_picture_mode = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_picture_mode = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_1
             parameter_len = 2
-            reply_extension_1 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_2
             parameter_len = 2
-            reply_extension_2 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_3
             parameter_len = 2
-            reply_extension_3 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_4
             parameter_len = 2
-            reply_extension_4 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_4 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_5
             parameter_len = 2
-            reply_extension_5 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_5 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_6
             parameter_len = 2
-            reply_extension_6 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_6 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_7
             parameter_len = 2
-            reply_extension_7 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_7 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             return PDScheduleTuple(status=0,
                                    program_no=reply_program_no,
@@ -999,103 +992,103 @@ class NECPD(object):
                       schedule_in.extension_6,
                       schedule_in.extension_7)
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC222))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(program_no))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.turn_on_hour))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.turn_on_minute))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.turn_off_hour))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.turn_off_minute))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.timer_input))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.week_setting))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.option))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.picture_mode))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.extension_1))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.extension_2))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.extension_3))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.extension_4))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.extension_5))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.extension_6))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.extension_7))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC222))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.turn_on_hour))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.turn_on_minute))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.turn_off_hour))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.turn_off_minute))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.timer_input))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.week_setting))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.option))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.picture_mode))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_1))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_2))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_3))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_4))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_5))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_6))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_7))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 38:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC322):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC322):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset = 4
             # status
             parameter_len = 2
-            reply_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             if reply_status != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             offset += parameter_len
             # program_no
             parameter_len = 2
-            reply_program_no = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_on_hour
             parameter_len = 2
-            reply_turn_on_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_on_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_on_minute
             parameter_len = 2
-            reply_turn_on_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_on_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_off_hour
             parameter_len = 2
-            reply_turn_off_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_off_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # turn_off_minute
             parameter_len = 2
-            reply_turn_off_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_turn_off_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # timer_input
             parameter_len = 2
-            reply_timer_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_timer_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # week_setting
             parameter_len = 2
-            reply_week_setting = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_week_setting = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # option
             parameter_len = 2
-            reply_option = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_option = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture_mode
             parameter_len = 2
-            reply_picture_mode = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_picture_mode = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_1
             parameter_len = 2
-            reply_extension_1 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_2
             parameter_len = 2
-            reply_extension_2 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_3
             parameter_len = 2
-            reply_extension_3 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_4
             parameter_len = 2
-            reply_extension_4 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_4 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_5
             parameter_len = 2
-            reply_extension_5 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_5 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_6
             parameter_len = 2
-            reply_extension_6 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_6 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # extension_7
             parameter_len = 2
-            reply_extension_7 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_extension_7 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             return PDScheduleTuple(status=reply_status,
                                    program_no=reply_program_no,
@@ -1128,37 +1121,37 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC22A))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC22A))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 10:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # LAN read reply command
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC32A):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC32A):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset = 4
             # status_byte
             parameter_len = 2
-            status_byte = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            status_byte = ascii_decode_value(reply_data[offset:offset + parameter_len])
             if status_byte != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             offset += parameter_len
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset += 2
             # IPV
             parameter_len = 2
-            ipv = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            ipv = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             mac = ""
             while offset+1 < len(reply_data):
-                x = protocol.ascii_decode_value(reply_data[offset:offset + 2])
+                x = ascii_decode_value(reply_data[offset:offset + 2])
                 mac += format(x, "x")
                 offset += 2
                 if offset < len(reply_data):
@@ -1177,21 +1170,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0B))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x00))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0B))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0B):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0B):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x00):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            mode = protocol.ascii_decode_value(reply_data[6:8])
+            mode = ascii_decode_value(reply_data[6:8])
             return mode
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
@@ -1209,22 +1202,22 @@ class NECPD(object):
         logging.debug('in_mode=%i', in_mode)
         assert 0 <= in_mode <= 2
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0B))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(in_mode))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0B))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(in_mode))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0B):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0B):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -1243,21 +1236,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0B))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0B))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0B):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0B):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            reply = protocol.ascii_decode_value(reply_data[6:8])
+            reply = ascii_decode_value(reply_data[6:8])
             return reply
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
@@ -1276,22 +1269,22 @@ class NECPD(object):
         logging.debug('in_value=%i', in_value)
         assert 0 <= in_value <= 120
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0B))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x03))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(in_value))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0B))
+        send_data.extend(ascii_encode_value_2_bytes(0x03))
+        send_data.extend(ascii_encode_value_2_bytes(in_value))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0B):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0B):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x03):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -1309,21 +1302,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0B))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x04))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0B))
+        send_data.extend(ascii_encode_value_2_bytes(0x04))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0B):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0B):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x04):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            reply = protocol.ascii_decode_value(reply_data[6:8])
+            reply = ascii_decode_value(reply_data[6:8])
             return reply
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
@@ -1342,22 +1335,22 @@ class NECPD(object):
         logging.debug('in_value=%i', in_value)
         assert 0 <= in_value <= 120
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0B))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x05))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(in_value))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0B))
+        send_data.extend(ascii_encode_value_2_bytes(0x05))
+        send_data.extend(ascii_encode_value_2_bytes(in_value))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0B):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0B):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x05):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x05):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             return
@@ -1375,21 +1368,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC22C))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC22C))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 16:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC32C):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC32C):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            major = protocol.ascii_decode_value(reply_data[4:12])
-            minor = protocol.ascii_decode_value(reply_data[12:16])
+            major = ascii_decode_value(reply_data[4:12])
+            minor = ascii_decode_value(reply_data[12:16])
         elif len(reply_data) == 4:
             # display replies with 0xC22C if tuner option not selected
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC22C):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC22C):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             raise PDCommandNotSupportedError('command_direct_tv_channel_read not available')
@@ -1411,30 +1404,30 @@ class NECPD(object):
         """
         logging.debug('channel_in_major=%i channel_in_minor=%i', channel_in_major, channel_in_minor)
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC22D))
-        send_data.extend(protocol.ascii_encode_value_4_bytes((channel_in_major & 0xffff0000) >> 16))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(channel_in_major & 0x0000ffff))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(channel_in_minor))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC22D))
+        send_data.extend(ascii_encode_value_4_bytes((channel_in_major & 0xffff0000) >> 16))
+        send_data.extend(ascii_encode_value_4_bytes(channel_in_major & 0x0000ffff))
+        send_data.extend(ascii_encode_value_4_bytes(channel_in_minor))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 16:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC32D):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC32D):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            major = protocol.ascii_decode_value(reply_data[4:12])
+            major = ascii_decode_value(reply_data[4:12])
             if major != channel_in_major:
                 logging.error('unexpected reply major does not match received')
                 raise unexpectedReply
-            minor = protocol.ascii_decode_value(reply_data[12:16])
+            minor = ascii_decode_value(reply_data[12:16])
             if minor != channel_in_minor:
                 logging.error('unexpected reply minor does not match received')
                 raise unexpectedReply
         elif len(reply_data) == 4:
             # display replies with 0xC22D if tuner option not selected
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC22D):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC22D):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             raise PDCommandNotSupportedError('command_direct_tv_channel_write not available')
@@ -1452,68 +1445,68 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x00))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA01))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 30:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB01):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x00):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             offset = 6
             # status
             parameter_len = 2
-            reply_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # begin_month
             parameter_len = 2
-            reply_begin_month = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_begin_month = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # begin_day1
             parameter_len = 2
-            reply_begin_day1 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_begin_day1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # begin_day2
             parameter_len = 2
-            reply_begin_day2 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_begin_day2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # begin_time_hour
             parameter_len = 2
-            reply_begin_time_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_begin_time_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # begin_time_minute
             parameter_len = 2
-            reply_begin_time_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_begin_time_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # end_month
             parameter_len = 2
-            reply_end_month = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_end_month = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # end_day1
             parameter_len = 2
-            reply_end_day1 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_end_day1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # end_day2
             parameter_len = 2
-            reply_end_day2 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_end_day2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # end_time_hour
             parameter_len = 2
-            reply_end_time_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_end_time_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # end_time_minute
             parameter_len = 2
-            reply_end_time_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_end_time_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # time_difference
             parameter_len = 2
-            reply_time_difference = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_time_difference = ascii_decode_value(reply_data[offset:offset + parameter_len])
             return PDDaylightSavingsTuple(status=reply_status, begin_month=reply_begin_month,
                                           begin_day1=reply_begin_day1,
                                           begin_day2=reply_begin_day2, begin_time_hour=reply_begin_time_hour,
@@ -1547,32 +1540,32 @@ class NECPD(object):
         assert 0 <= schedule_in.end_time_minute <= 59
         assert 0 <= schedule_in.time_difference <= 3
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.begin_month))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.begin_day1))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.begin_day2))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.begin_time_hour))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.begin_time_minute))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.end_month))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.end_day1))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.end_day2))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.end_time_hour))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.end_time_minute))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(schedule_in.time_difference))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA01))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.begin_month))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.begin_day1))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.begin_day2))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.begin_time_hour))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.begin_time_minute))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.end_month))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.end_day1))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.end_day2))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.end_time_hour))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.end_time_minute))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.time_difference))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB01):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            status = protocol.ascii_decode_value(reply_data[6:8])
+            status = ascii_decode_value(reply_data[6:8])
             if status != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
@@ -1590,24 +1583,24 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA01))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 10:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB01):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
-            return protocol.ascii_decode_value(reply_data[8:10])
+            return ascii_decode_value(reply_data[8:10])
         else:
             logging.error('unexpected reply length: %i (expected 10)', len(reply_data))
             raise unexpectedReply
@@ -1623,22 +1616,22 @@ class NECPD(object):
         logging.debug('')
         assert 0 <= value <= 1
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x03))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(value))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA01))
+        send_data.extend(ascii_encode_value_2_bytes(0x03))
+        send_data.extend(ascii_encode_value_2_bytes(value))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB01):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x03):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             return
@@ -1655,21 +1648,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0A))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0A))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0A):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0A):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             return
@@ -1685,19 +1678,19 @@ class NECPD(object):
         """
         logging.debug('')
         self.f.settimeout(30)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         self.f.settimeout(reply_timeout)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCA0A):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCA0A):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            return protocol.ascii_decode_value(reply_data[6:8])
+            return ascii_decode_value(reply_data[6:8])
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
             self.f.settimeout(reply_timeout)
@@ -1712,21 +1705,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0A))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x03))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0A))
+        send_data.extend(ascii_encode_value_2_bytes(0x03))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0A):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0A):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x03):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             return
@@ -1748,26 +1741,26 @@ class NECPD(object):
         assert 1 <= settings.current_input_select <= 255
         assert 0 <= settings.tile_matrix_mem <= 1
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA03))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.h_monitors))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.v_monitors))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.pattern_id))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.current_input_select))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.tile_matrix_mem))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA03))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(settings.h_monitors))
+        send_data.extend(ascii_encode_value_2_bytes(settings.v_monitors))
+        send_data.extend(ascii_encode_value_2_bytes(settings.pattern_id))
+        send_data.extend(ascii_encode_value_2_bytes(settings.current_input_select))
+        send_data.extend(ascii_encode_value_2_bytes(settings.tile_matrix_mem))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB03):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             return
@@ -1783,19 +1776,19 @@ class NECPD(object):
         """
         logging.debug('')
         self.f.settimeout(30)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         self.f.settimeout(reply_timeout)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB03):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            return protocol.ascii_decode_value(reply_data[6:8])
+            return ascii_decode_value(reply_data[6:8])
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
             self.f.settimeout(reply_timeout)
@@ -1810,25 +1803,25 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA03))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x04))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA03))
+        send_data.extend(ascii_encode_value_2_bytes(0x04))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 12:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB03):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x04):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
-            h_monitors = protocol.ascii_decode_value(reply_data[8:10])
-            v_monitors = protocol.ascii_decode_value(reply_data[10:12])
+            h_monitors = ascii_decode_value(reply_data[8:10])
+            v_monitors = ascii_decode_value(reply_data[10:12])
             return h_monitors, v_monitors
         else:
             logging.error('unexpected reply length: %i (expected 12)', len(reply_data))
@@ -1846,20 +1839,20 @@ class NECPD(object):
         assert 1 <= h_monitors <= 10
         assert 1 <= v_monitors <= 10
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA03))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x05))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(h_monitors))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(v_monitors))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA03))
+        send_data.extend(ascii_encode_value_2_bytes(0x05))
+        send_data.extend(ascii_encode_value_2_bytes(h_monitors))
+        send_data.extend(ascii_encode_value_2_bytes(v_monitors))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB03):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x05):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x05):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             return
@@ -1876,21 +1869,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA03))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x06))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA03))
+        send_data.extend(ascii_encode_value_2_bytes(0x06))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB03):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x06):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x06):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             return
@@ -1910,17 +1903,17 @@ class NECPD(object):
         send_data = []
         asset_string = ""
         assert 0 <= offset <= 64
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC00B))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(offset))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(32))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC00B))
+        send_data.extend(ascii_encode_value_2_bytes(offset))
+        send_data.extend(ascii_encode_value_2_bytes(32))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 4:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # asset data Read reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC10B):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC10B):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             for x in reply_data[4:]:
@@ -1948,28 +1941,28 @@ class NECPD(object):
         assert 0 <= offset <= 64
         assert 0 <= len(in_string) <= 32
         assert offset+len(in_string) <= 64
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC00E))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(offset))
+        send_data.extend(ascii_encode_value_4_bytes(0xC00E))
+        send_data.extend(ascii_encode_value_2_bytes(offset))
         for x in in_string:
             send_data.extend([ord(x)])
         # pad with null
         for i in range(len(in_string), 32):
             send_data.extend([0])
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # asset data write reply
-            result = protocol.ascii_decode_value(reply_data[0:2])
+            result = ascii_decode_value(reply_data[0:2])
             if result != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
-            if reply_data[2:6] != protocol.ascii_encode_value_4_bytes(0xC00E):
+            if reply_data[2:6] != ascii_encode_value_4_bytes(0xC00E):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(offset):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(offset):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             for x in reply_data[8:]:
@@ -1993,23 +1986,23 @@ class NECPD(object):
         logging.debug('code=%02xh', code)
         assert 0 <= code <= 0xffff
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC210))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(code))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x03))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xC210))
+        send_data.extend(ascii_encode_value_4_bytes(code))
+        send_data.extend(ascii_encode_value_2_bytes(0x03))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC310):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC310):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:8] != protocol.ascii_encode_value_4_bytes(code):
+            if reply_data[4:8] != ascii_encode_value_4_bytes(code):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
         elif len(reply_data) == 12:  # older models reply with this format
-            if reply_data[2:6] != protocol.ascii_encode_value_4_bytes(0xC210):
+            if reply_data[2:6] != ascii_encode_value_4_bytes(0xC210):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:10] != protocol.ascii_encode_value_4_bytes(code):
+            if reply_data[6:10] != ascii_encode_value_4_bytes(code):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
         else:
@@ -2027,24 +2020,24 @@ class NECPD(object):
         logging.debug('')
         send_data = []
         name_string = ""
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA04))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x00))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA04))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB04):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x00):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             pos = 6
             while pos < len(reply_data):
-                x = protocol.ascii_decode_value(reply_data[pos:pos + 2])
+                x = ascii_decode_value(reply_data[pos:pos + 2])
                 if x == 0:
                     break
                 pos += 2
@@ -2066,24 +2059,24 @@ class NECPD(object):
         logging.debug('name_string=%s', name_string)
         send_data = []
         assert len(name_string) <= 8
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA04))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_4_bytes(0xCA04))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
         for char in name_string:
-            send_data.extend(protocol.ascii_encode_value_2_bytes(ord(char)))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+            send_data.extend(ascii_encode_value_2_bytes(ord(char)))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB04):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(0x00):
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2101,22 +2094,22 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA04))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA04))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB04):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(0x00):
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2136,31 +2129,31 @@ class NECPD(object):
         assert 0x00 <= video_input <= 0xff
         send_data = []
         name_string = ""
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA04))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x03))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(video_input))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA04))
+        send_data.extend(ascii_encode_value_2_bytes(0x03))
+        send_data.extend(ascii_encode_value_2_bytes(video_input))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 10:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB04):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x03):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(0x00):
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
-            if reply_data[8:10] != protocol.ascii_encode_value_2_bytes(video_input):
+            if reply_data[8:10] != ascii_encode_value_2_bytes(video_input):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             pos = 10
             while pos < len(reply_data):
-                x = protocol.ascii_decode_value(reply_data[pos:pos + 2])
+                x = ascii_decode_value(reply_data[pos:pos + 2])
                 if x == 0:
                     break
                 pos += 2
@@ -2184,25 +2177,25 @@ class NECPD(object):
         assert 0x00 <= video_input <= 0xff
         send_data = []
         assert len(name_string) <= 8
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA04))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x04))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(video_input))
+        send_data.extend(ascii_encode_value_4_bytes(0xCA04))
+        send_data.extend(ascii_encode_value_2_bytes(0x04))
+        send_data.extend(ascii_encode_value_2_bytes(video_input))
         for char in name_string:
-            send_data.extend(protocol.ascii_encode_value_2_bytes(ord(char)))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+            send_data.extend(ascii_encode_value_2_bytes(ord(char)))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB04):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x04):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(0x00):
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2222,23 +2215,23 @@ class NECPD(object):
         logging.debug('input=%i', video_input)
         assert 0x00 <= video_input <= 0xff
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA04))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x05))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(video_input))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA04))
+        send_data.extend(ascii_encode_value_2_bytes(0x05))
+        send_data.extend(ascii_encode_value_2_bytes(video_input))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
             # reply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB04):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB04):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x05):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x05):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[6:8] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[6:8] != ascii_encode_value_2_bytes(0x00):
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2255,21 +2248,21 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0C))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0C))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0C):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0C):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            secure_mode = protocol.ascii_decode_value(reply_data[6:8])
+            secure_mode = ascii_decode_value(reply_data[6:8])
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
             raise unexpectedReply
@@ -2288,26 +2281,26 @@ class NECPD(object):
         assert 0 <= secure_mode <= 3
         assert len(password) == 4
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA0C))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(secure_mode))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x00))
+        send_data.extend(ascii_encode_value_4_bytes(0xCA0C))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(secure_mode))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
         for char in password:
             assert 0x30 <= ord(char) <= 0x39
             send_data.extend([0x33, 0x33, 0x33, ord(char)])
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB0C):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB0C):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2328,22 +2321,22 @@ class NECPD(object):
         assert len(password) == 4
         logging.debug('secure_mode=%i password=%s', secure_mode, password)
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xC21D))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(secure_mode))
+        send_data.extend(ascii_encode_value_4_bytes(0xC21D))
+        send_data.extend(ascii_encode_value_2_bytes(secure_mode))
         for char in password:
             assert 0x30 <= ord(char) <= 0x39
-            send_data.extend(protocol.ascii_encode_value_2_bytes(ord(char)-0x30))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+            send_data.extend(ascii_encode_value_2_bytes(ord(char)-0x30))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xC31D):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC31D):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            status = protocol.ascii_decode_value(reply_data[4:6])
-            mode = protocol.ascii_decode_value(reply_data[6:8])
+            status = ascii_decode_value(reply_data[4:6])
+            mode = ascii_decode_value(reply_data[6:8])
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
             raise unexpectedReply
@@ -2360,22 +2353,22 @@ class NECPD(object):
         assert 0 <= in_mode <= 2
         logging.debug('in_mode=%i', in_mode)
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA15))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x00))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(in_mode))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA15))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
+        send_data.extend(ascii_encode_value_2_bytes(in_mode))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB15):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB15):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x00):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            status = protocol.ascii_decode_value(reply_data[6:8])
+            status = ascii_decode_value(reply_data[6:8])
         else:
             logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
             raise unexpectedReply
@@ -2390,24 +2383,24 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA15))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA15))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 18:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB15):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB15):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            reply_error_status = protocol.ascii_decode_value(reply_data[6:8])
-            reply_total_number = protocol.ascii_decode_value(reply_data[8:12])
-            reply_maximum_number = protocol.ascii_decode_value(reply_data[12:16])
-            reply_current_status = protocol.ascii_decode_value(reply_data[16:18])
+            reply_error_status = ascii_decode_value(reply_data[6:8])
+            reply_total_number = ascii_decode_value(reply_data[8:12])
+            reply_maximum_number = ascii_decode_value(reply_data[12:16])
+            reply_current_status = ascii_decode_value(reply_data[16:18])
             return PDProofOfPlayStatusTuple(error_status=reply_error_status,
                                             total_number=reply_total_number,
                                             maximum_number=reply_maximum_number,
@@ -2426,94 +2419,94 @@ class NECPD(object):
         """
         logging.debug('')
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA15))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA15))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 50:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB15):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB15):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
 
             offset = 6
             parameter_len = 2
-            reply_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             if reply_status != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             parameter_len = 4
-            reply_log_number = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_log_number = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 4
-            reply_signal_h_resolution = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_signal_h_resolution = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 4
-            reply_signal_v_resolution = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_signal_v_resolution = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_audio_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_audio_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_audio_input_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_audio_input_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_picture_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_picture_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_audio_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_audio_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 4
-            reply_year = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_year = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_month = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_month = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_day = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_day = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_second = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_second = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_reserved_1 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_reserved_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_reserved_2 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_reserved_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_reserved_3 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_reserved_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             
             return PDProofOfPlayLogItemTuple(status=reply_status, 
@@ -2553,98 +2546,98 @@ class NECPD(object):
         assert 0 <= from_number <= 0xffff
         logging.debug('from_number=%i to_number=%i', from_number, to_number)
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA15))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x03))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(from_number))
-        send_data.extend(protocol.ascii_encode_value_4_bytes(to_number))
+        send_data.extend(ascii_encode_value_4_bytes(0xCA15))
+        send_data.extend(ascii_encode_value_2_bytes(0x03))
+        send_data.extend(ascii_encode_value_4_bytes(from_number))
+        send_data.extend(ascii_encode_value_4_bytes(to_number))
 
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 50:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB15):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB15):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x03):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x03):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
 
             offset = 6
             parameter_len = 2
-            reply_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             if reply_status != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
 
             parameter_len = 4
-            reply_log_number = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_log_number = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 4
-            reply_signal_h_resolution = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_signal_h_resolution = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 4
-            reply_signal_v_resolution = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_signal_v_resolution = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_audio_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_audio_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_audio_input_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_audio_input_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_picture_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_picture_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_audio_status = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_audio_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 4
-            reply_year = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_year = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_month = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_month = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_day = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_day = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_hour = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_minute = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_second = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_second = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_reserved_1 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_reserved_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_reserved_2 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_reserved_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             parameter_len = 2
-            reply_reserved_3 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_reserved_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             return PDProofOfPlayLogItemTuple(status=reply_status, 
                                              log_number=reply_log_number,
@@ -2680,21 +2673,21 @@ class NECPD(object):
         logging.debug('offset=%i', offset)
         capability_string = ""
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0xF3))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(offset >> 8))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(offset & 0xff))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_2_bytes(0xF3))
+        send_data.extend(ascii_encode_value_2_bytes(offset >> 8))
+        send_data.extend(ascii_encode_value_2_bytes(offset & 0xff))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) >= 6:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received (expected reply_message_type 42h')
                 raise unexpectedReply
             # capabilities request reply command
-            if reply_data[0:2] != protocol.ascii_encode_value_2_bytes(0xE3):
+            if reply_data[0:2] != ascii_encode_value_2_bytes(0xE3):
                 logging.error('unexpected reply received (expected capabilities request reply command E3 (45h 33h)')
                 raise unexpectedReply
-            reply_offset = (protocol.ascii_decode_value(reply_data[2:4]) << 8)
-            reply_offset += protocol.ascii_decode_value(reply_data[4:6])
+            reply_offset = (ascii_decode_value(reply_data[2:4]) << 8)
+            reply_offset += ascii_decode_value(reply_data[4:6])
             if reply_offset != offset:
                 logging.debug('command_capabilities_request offsets do not match: %i vs %i', reply_offset, offset)
                 raise unexpectedReply
@@ -2735,26 +2728,26 @@ class NECPD(object):
         assert 1 <= settings.position <= 100
         assert 1 <= settings.tile_comp <= 2
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA17))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x00))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.profile_number))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.h_monitors))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.v_monitors))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.tile_comp))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA17))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
+        send_data.extend(ascii_encode_value_2_bytes(settings.profile_number))
+        send_data.extend(ascii_encode_value_2_bytes(settings.h_monitors))
+        send_data.extend(ascii_encode_value_2_bytes(settings.v_monitors))
+        send_data.extend(ascii_encode_value_2_bytes(settings.position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.tile_comp))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB17):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB17):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x00):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2778,44 +2771,44 @@ class NECPD(object):
         logging.debug('profile_number=%i', profile_number)
         assert 0 <= profile_number <= 4
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA17))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(profile_number))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA17))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(profile_number))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 18:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB17):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB17):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             offset = 8
             # profile_number
             parameter_len = 2
-            profile_number = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            profile_number = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # h_monitors
             parameter_len = 2
-            h_monitors = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            h_monitors = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # v_monitors
             parameter_len = 2
-            v_monitors = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            v_monitors = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # position
             parameter_len = 2
-            position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # tile_comp
             parameter_len = 2
-            tile_comp = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            tile_comp = ascii_decode_value(reply_data[offset:offset + parameter_len])
             return PDTileMatrixProfileTuple(profile_number=profile_number,
                                             h_monitors=h_monitors,
                                             v_monitors=v_monitors,
@@ -2836,22 +2829,22 @@ class NECPD(object):
         logging.debug('profile_number=%i', profile_number)
         assert 0 <= profile_number <= 4
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA17))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(profile_number))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA17))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        send_data.extend(ascii_encode_value_2_bytes(profile_number))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB17):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB17):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2913,56 +2906,56 @@ class NECPD(object):
         assert 0 <= settings.profile_number <= 4
 
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA20))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x00))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.profile_number))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.pip_pbp_mode))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture1_input))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture2_input))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture3_input))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture4_input))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture1_size))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture2_size))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture3_size))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture4_size))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture1_aspect))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture2_aspect))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture3_aspect))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture4_aspect))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture1_h_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture2_h_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture3_h_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture4_h_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture1_v_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture2_v_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture3_v_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.picture4_v_position))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_11))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_12))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_13))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_14))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_15))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_16))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_17))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_18))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_19))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_20))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_21))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(settings.reserved_22))
+        send_data.extend(ascii_encode_value_4_bytes(0xCA20))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
+        send_data.extend(ascii_encode_value_2_bytes(settings.profile_number))
+        send_data.extend(ascii_encode_value_2_bytes(settings.pip_pbp_mode))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture1_input))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture2_input))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture3_input))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture4_input))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture1_size))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture2_size))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture3_size))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture4_size))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture1_aspect))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture2_aspect))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture3_aspect))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture4_aspect))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture1_h_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture2_h_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture3_h_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture4_h_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture1_v_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture2_v_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture3_v_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.picture4_v_position))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_11))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_12))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_13))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_14))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_15))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_16))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_17))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_18))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_19))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_20))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_21))
+        send_data.extend(ascii_encode_value_2_bytes(settings.reserved_22))
 
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB20):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB20):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x00):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x00):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:
@@ -2981,127 +2974,127 @@ class NECPD(object):
         logging.debug('profile_number=%i', profile_number)
         assert 0 <= profile_number <= 4
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA20))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x01))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(profile_number))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA20))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(profile_number))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 52:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB20):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB20):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x01):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x01):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
             offset = 8
             # profile_number
             parameter_len = 2
-            profile_number = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            profile_number = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # pip_pbp_mode
-            pip_pbp_mode = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            pip_pbp_mode = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len        
             # picture1_input
-            picture1_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture1_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture2_input
-            picture2_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture2_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture3_input
-            picture3_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture3_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture4_input
-            picture4_input = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture4_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len            
             # picture1_size
-            picture1_size = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture1_size = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture2_size
-            picture2_size = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture2_size = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture3_size
-            picture3_size = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture3_size = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture4_size
-            picture4_size = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture4_size = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len            
             # picture1_aspect
-            picture1_aspect = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture1_aspect = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture2_aspect
-            picture2_aspect = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture2_aspect = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture3_aspect
-            picture3_aspect = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture3_aspect = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture4_aspect
-            picture4_aspect = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture4_aspect = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len            
             # picture1_h_position
-            picture1_h_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture1_h_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture2_h_position
-            picture2_h_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture2_h_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture3_h_position
-            picture3_h_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture3_h_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture4_h_position
-            picture4_h_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture4_h_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len            
             # picture1_v_position
-            picture1_v_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture1_v_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture2_v_position
-            picture2_v_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture2_v_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture3_v_position
-            picture3_v_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture3_v_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # picture4_v_position
-            picture4_v_position = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            picture4_v_position = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_11
-            reserved_11 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_11 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_12
-            reserved_12 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_12 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_13
-            reserved_13 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_13 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_14
-            reserved_14 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_14 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_15
-            reserved_15 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_15 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_16
-            reserved_16 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_16 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_17
-            reserved_17 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_17 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_18
-            reserved_18 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_18 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_19
-            reserved_19 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_19 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_20
-            reserved_20 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_20 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_21
-            reserved_21 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_21 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
             # reserved_22
-            reserved_22 = protocol.ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reserved_22 = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
 
             return PDPIPPBPProfileTuple(profile_number=profile_number,
@@ -3153,22 +3146,22 @@ class NECPD(object):
         logging.debug('profile_number=%i', profile_number)
         assert 0 <= profile_number <= 4
         send_data = []
-        send_data.extend(protocol.ascii_encode_value_4_bytes(0xCA20))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(0x02))
-        send_data.extend(protocol.ascii_encode_value_2_bytes(profile_number))
-        protocol.write_command(self.f, send_data, self.destination_address, 0x41)
-        reply_data, reply_message_type, reply_destination_address = protocol.read_command_reply(self.f, True)
+        send_data.extend(ascii_encode_value_4_bytes(0xCA20))
+        send_data.extend(ascii_encode_value_2_bytes(0x02))
+        send_data.extend(ascii_encode_value_2_bytes(profile_number))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
         if len(reply_data) == 8:
             if reply_message_type != 0x42:
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[0:4] != protocol.ascii_encode_value_4_bytes(0xCB20):
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB20):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if reply_data[4:6] != protocol.ascii_encode_value_2_bytes(0x02):
+            if reply_data[4:6] != ascii_encode_value_2_bytes(0x02):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            if protocol.ascii_decode_value(reply_data[6:8]) != 0:
+            if ascii_decode_value(reply_data[6:8]) != 0:
                 logging.error('reply status is not 0')
                 raise commandStatusReturnedError
         else:

@@ -27,20 +27,20 @@ def main():
         pd.helper_set_destination_monitor_id(1)
         try:
             value = pd.helper_date_and_time_write_keep_daylight_savings_setting(datetime.datetime.now())
-            print("helper_date_and_time_write status:", value.status,
+            print(("helper_date_and_time_write status:", value.status,
                   "year:", value.year,
                   "month:", value.month,
                   "day:", value.day,
                   "weekday:", value.weekday,
                   "hour:", value.hour,
                   "minute:", value.minute,
-                  "daylight_savings:", value.daylight_savings)
+                  "daylight_savings:", value.daylight_savings))
         finally:
             # make sure to always close
             pd.close()
 
     except PDError as msg:
-        print("PDError:", msg)
+        print(("PDError:", msg))
     return
 
 if __name__ == '__main__':

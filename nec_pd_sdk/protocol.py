@@ -9,7 +9,7 @@ Revision: 170322
 # See LICENSE.rst for details.
 #
 
-from __future__ import print_function
+
 import logging
 
 
@@ -118,8 +118,16 @@ def read_command_reply(f, destination_reply_is_monitor_id):
     c = read_data(f, 2)
     message_length = int(c, 16)
     logging.debug('message_length=%02xh', message_length)
-    checksum ^= ord(c[0])
-    checksum ^= ord(c[1])
+    # Python3 is read as int, so don't need the ord
+    # Python2 needs the ord
+    if (isinstance(c[0], int)):
+        checksum ^= c[0]
+    else:
+        checksum ^= ord(c[0])
+    if (isinstance(c[0], int)):
+        checksum ^= c[1]
+    else:
+        checksum ^= ord(c[1])
     # message payload
     if message_length > 0:
         c = read_character_as_ord(f)

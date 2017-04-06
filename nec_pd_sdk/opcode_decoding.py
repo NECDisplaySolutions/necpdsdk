@@ -18,7 +18,7 @@ opcode_values_to_name_dict = dict()
 
 
 def reverse_dict(d):
-    return dict(zip(d.values(), d.keys()))
+    return dict(list(zip(list(d.values()), list(d.keys()))))
 
 
 def load_opcode_dict():
@@ -140,7 +140,7 @@ def get_opcode_list():
     :return: A numerical list of all of the known opcodes
     """
     assert len(opcode_to_name_dict)  # forgot to load_opcode_dict
-    keys = opcode_to_name_dict.keys()
+    keys = list(opcode_to_name_dict.keys())
     keys.sort()
     return keys
 
@@ -158,7 +158,7 @@ def get_opcode_nice_value_name_list(opcode):
     assert len(opcode_values_to_name_dict)  # forgot to load_opcode_dict
     assert 0x0000 <= opcode <= 0xffff
     if opcode in opcode_values_to_name_dict:
-        return opcode_values_to_name_dict[opcode].values()
+        return list(opcode_values_to_name_dict[opcode].values())
     return
 
 
@@ -175,7 +175,7 @@ def get_opcode_value_list(opcode):
     assert len(opcode_values_to_name_dict)  # forgot to load_opcode_dict
     assert 0x0000 <= opcode <= 0xffff
     if opcode in opcode_values_to_name_dict:
-        return opcode_values_to_name_dict[opcode].keys()
+        return list(opcode_values_to_name_dict[opcode].keys())
     return
 
 

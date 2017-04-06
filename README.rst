@@ -40,4 +40,4 @@ SOFTWARE.
 
 What's New
 -----------
-Initial Release
+Add support for running on Python 3.

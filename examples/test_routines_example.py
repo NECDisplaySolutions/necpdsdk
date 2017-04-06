@@ -9,7 +9,9 @@ Revision: 170317
 # See LICENSE.rst for details.
 #
 
+
 from __future__ import print_function
+from builtins import input
 import logging
 from nec_pd_sdk.nec_pd_sdk import NECPD
 from nec_pd_sdk.protocol import PDError
@@ -19,11 +21,16 @@ from nec_pd_sdk.opcode_decoding import *
 
 
 def reverse_dict(d):
-    return dict(zip(d.values(), d.keys()))
+    return dict(list(zip(list(d.values()), list(d.keys()))))
 
 
 def do_main_tests(pd):
     try:
+
+        print("Testing: helper_asset_data_read")
+        value = pd.helper_asset_data_read()
+        print("helper_asset_data_read value: ", value)
+
         print("Testing: command_model_name_read")
         value = pd.command_model_name_read()
         print("command_model_name_read value:", value)
@@ -142,7 +149,7 @@ def main():
     print("'5' = /dev/ttyS0 (Raspberry Pi 3)")
     print("'6' = /dev/ttyAMA0 (Raspberry Pi 1&2)")
     print("'7' = 192.168.0.10 (Default IP)")
-    port = raw_input("or Enter an IP address or COM port name: ")
+    port = input("or Enter an IP address or COM port name: ")
 
     if len(port) == 0:
         port = '192.168.1.140'
@@ -170,7 +177,7 @@ def main():
     try:
         pd = NECPD.open(port)
 
-        monitor_id = raw_input("Enter the Monitor ID (1-100, A-J or ALL (Enter for 1): ")
+        monitor_id = input("Enter the Monitor ID (1-100, A-J or ALL (Enter for 1): ")
         if len(monitor_id) == 0:
             monitor_id = 1
 

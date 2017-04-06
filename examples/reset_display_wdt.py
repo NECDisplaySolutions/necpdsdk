@@ -69,9 +69,9 @@ def reset_wdt(pd):
         else:
             print("WDT Reset")
     except PDUnexpectedReplyError as msg:
-        print("PDUnexpectedReplyError:", msg)
+        print(("PDUnexpectedReplyError:", msg))
     except PDError as msg:
-        print("PDError:", msg)
+        print(("PDError:", msg))
     return
 
 
@@ -89,14 +89,14 @@ def main():
             # next do an infinite loop of resetting the WDT.
             while True:
                 try:
-                    print("Waiting for ", interval, "seconds")
+                    print(("Waiting for ", interval, "seconds"))
                     time.sleep(interval)
                     pd = NECPD.open(port)
                     reset_wdt(pd)
 
                 except PDError as msg:
                     # catch any connection errors here so it continues regardless.
-                    print("PDError:", msg)
+                    print(("PDError:", msg))
                     logging.error('main loop PDError %s ', msg)
                 finally:
                     # make sure to always close.
@@ -112,7 +112,7 @@ def main():
             # print("closing port because error during initial check ")
             pd.close()
     except PDError as msg:
-        print("Connection error PDError:", msg)
+        print(("Connection error PDError:", msg))
 
     return
 

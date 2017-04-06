@@ -32,7 +32,7 @@ GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # Perform this when the event is triggered
 def Shutdown(channel):
-    print "shutdown the system..."
+    print("shutdown the system...")
     GPIO.cleanup()
     os.system("sudo shutdown -h now")
 

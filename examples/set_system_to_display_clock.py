@@ -31,7 +31,7 @@ def main():
         try:
             value, daylight_savings = pd.helper_date_and_time_read()
             date_str = '{}-{}-{} {}:{}'.format(value.year, value.month, value.day, value.hour, value.minute)
-            print("date_str:", date_str)
+            print(("date_str:", date_str))
             os.system('sudo date -s "%s"' % date_str)
 
         finally:
@@ -39,7 +39,7 @@ def main():
             pd.close()
 
     except PDError as msg:
-        print("PDError:", msg)
+        print(("PDError:", msg))
     return
 
 if __name__ == '__main__':
