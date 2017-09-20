@@ -23,6 +23,7 @@ import serial
 import logging
 import time
 import datetime
+from enum import Enum
 from .protocol import *
 from .constants import *
 
@@ -198,6 +199,29 @@ PDPIPPBPProfileTuple = namedtuple('PDPIPPBPProfileTuple',
                                    'reserved_21',
                                    'reserved_22'])
 
+class PDSchedule():
+    """
+    This class holds the definitions values of schedule items
+    """
+
+    OnEvent = 1
+    OffEvent = 2
+
+    EveryDay = 0x01
+    SpecificDays = 0x02
+    Enabled = 0x04
+    Weekdays = 0x08
+    Weekends = 0x10
+    Holidays = 0x20
+    OneDay = 0x40
+
+    Monday = 0x01
+    Tuesday = 0x02
+    Wednesday = 0x04
+    Thursday = 0x08
+    Friday = 0x10
+    Saturday = 0x20
+    Sunday = 0x40
 
 def retry(function):
     """
@@ -939,6 +963,8 @@ class NECPD(object):
         send_data.extend(ascii_encode_value_2_bytes(schedule_in.week))
         send_data.extend(ascii_encode_value_2_bytes(schedule_in.type))
         send_data.extend(ascii_encode_value_2_bytes(schedule_in.picture_mode))
+        if schedule_in.year > 2000:
+            schedule_in.year = schedule_in.year - 2000
         send_data.extend(ascii_encode_value_2_bytes(schedule_in.year))
         send_data.extend(ascii_encode_value_2_bytes(schedule_in.month))
         send_data.extend(ascii_encode_value_2_bytes(schedule_in.day))
@@ -1153,12 +1179,16 @@ class NECPD(object):
         :return: PDHolidayTuple
         """
 
+        assert 0 <= program_no <= 50 
         send_data = []
         send_data.extend(ascii_encode_value_4_bytes(0xCA19))
         send_data.extend(ascii_encode_value_2_bytes(0x01))
         send_data.extend(ascii_encode_value_2_bytes(program_no))
         send_data.extend(ascii_encode_value_2_bytes(holiday.type))
-        send_data.extend(ascii_encode_value_2_bytes(holiday.year))
+        year = holiday.year
+        if holiday.year > 2000:
+            year = holiday.year - 2000
+        send_data.extend(ascii_encode_value_2_bytes(year))
         send_data.extend(ascii_encode_value_2_bytes(holiday.month))
         if holiday.type & 0x02:
             send_data.extend(ascii_encode_value_2_bytes(holiday.day))
@@ -1480,6 +1510,9 @@ class NECPD(object):
 
         # year
         reply_year = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        if reply_year > 0:
+            reply_year += 2000
+
         offset += parameter_len
 
         # month
@@ -1587,6 +1620,9 @@ class NECPD(object):
         offset += parameter_len
 
         reply_year = ascii_decode_value(reply_data[offset: offset + parameter_len])
+        if reply_year > 0:
+            reply_year += 2000
+
         offset += parameter_len
 
         reply_month = ascii_decode_value(reply_data[offset: offset + parameter_len])
@@ -4091,3 +4127,224 @@ class NECPD(object):
             reply.append(self.command_holiday_read(x))
 
         return reply
+
+    def helper_schedule_is_empty(self, schedule):
+        """
+        Helper function to determin if the schedule is empty
+
+        :param schedule: Schedule
+        :return: True if the scheule is empty
+        """
+
+        reply = False
+        if schedule.hour == 24 and schedule.minute == 60:
+            reply = True
+
+        return reply
+    
+    def helper_schedule_is_enabled(self, schedule):
+        """
+        Helper function to determin if the schedule is enabled
+
+        :param schedule: Schedule
+        :return: True if the scheule is enabled
+        """
+
+        reply = False
+        if schedule.type & 0x04:
+            reply = True
+
+        return reply
+
+    def helper_schedule_is_every_day(self, schedule):
+        """
+        Helper function to determine if the schedule type is Every Day
+
+        :param schedule: Schedule 
+        :return: True if the schedule type is every day.
+        """
+   
+        reply = False
+        if schedule.type & 0x01:
+            reply = True
+
+        return reply
+
+    def helper_schedule_is_every(self, schedule):
+        """
+        Helper function to determine if the schedule type is Every 
+
+        :param schedule: Schedule 
+        :return: True if the schedule type is every 
+        """
+   
+        reply = False
+        if schedule.type & 0x02 and schedule.week != 0:
+            reply = True
+
+        return reply
+
+    def helper_schedule_is_specific_days(self, schedule):
+        """
+        Helper function to determine if the schedule type is Specific Days 
+
+        :param schedule: Schedule 
+        :return: True if the schedule type is specific days 
+        """
+   
+        reply = False
+        if schedule.type & 0x02 and schedule.week == 0:
+            reply = True
+
+        return reply
+
+    def helper_schedule_is_weekdays(self, schedule):
+        """
+        Helper function to determine if the schedule type is Weekdays
+
+        :param schedule: Schedule 
+        :return: True if the schedule type is Weekdays
+        """
+   
+        reply = False
+        if schedule.type & 0x08: 
+            reply = True
+
+        return reply
+ 
+    def helper_schedule_is_weekends(self, schedule):
+        """
+        Helper function to determine if the schedule type is Weekends
+
+        :param schedule: Schedule 
+        :return: True if the schedule type is Weekends
+        """
+   
+        reply = False
+        if schedule.type & 0x10: 
+            reply = True
+
+        return reply
+ 
+    def helper_schedule_is_holidays(self, schedule):
+        """
+        Helper function to determine if the schedule type is holidays
+
+        :param schedule: Schedule 
+        :return: True if the schedule type is holidays
+        """
+   
+        reply = False
+        if schedule.type & 0x20: 
+            reply = True
+
+        return reply
+ 
+    def helper_schedule_is_one_day(self, schedule):
+        """
+        Helper function to determine if the schedule type is one_day
+
+        :param schedule: Schedule 
+        :return: True if the schedule type is one_day
+        """
+   
+        reply = False
+        if schedule.type & 0x40: 
+            reply = True
+
+        return reply
+ 
+    def helper_schedule_type_string(self, schedule):
+        """
+        Helper function to return the type string
+
+        :param schedule: Schedule
+        :return: Type string
+        """
+
+        str = ""
+        if schedule.type & 0x01:
+            str = "Every Day"
+        elif schedule.type & 0x02:
+            if schedule.week != 0:
+                str = "Every "
+            else:
+                str = "Specific Days"
+        elif schedule.type & 0x08:
+            str = "Weekdays"
+        elif schedule.type & 0x10:
+            str = "Weekends"
+        elif schedule.type & 0x20:
+            str = "Holidays"
+        elif schedule.type & 0x40:
+            str = "One Day on "
+
+        return str
+
+    def helper_schedule_week_string(self, week):
+        """
+        Helper function to get the week string
+
+        :param week: Schedule week
+        :return: Week String such as "Mon, Tues, Fri"
+        """
+
+        str = ""
+        if week & 0x01:
+            str += "Mon"
+        if week & 0x02:
+            if str != "":
+                str += ", "
+            str += "Tues" 
+        if week & 0x04:
+            if str != "":
+                str += ", "
+            str += "Wed"
+        if week & 0x08:
+            if str != "":
+                str += ", "
+            str += "Thurs"
+        if week & 0x10:
+            if str != "":
+                str != ", "
+            str += "Fri"
+        if week & 0x20:
+            if str != "":
+                str += ", "
+            str += "Sat"
+        if week & 0x40:
+            if str != "":
+                str += ", "
+            str += "Sun"
+
+        return str;
+
+    def helper_schedule_set_type(self, type, enable):
+        """
+        Set the schedule type.  If enable is True, then also include
+        the enable bit in the schedule.
+
+        :param type: Type of schedule.  See the class PDSchedule for types
+        :param enable: If True, also enable the schedule
+        :return: The Schedule Type
+        """
+
+        schedType = type;
+        if enable == True:
+            schedType += PDSchedule.Enabled
+
+        return schedType
+
+    def helper_schedule_set_week(self, week):
+        """
+        Set the week.
+
+        :param week: Array of Days to set
+        :return: The week 
+        """
+
+        days = 0
+        for day in week:
+            days += day
+
+        return days

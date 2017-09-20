@@ -23,6 +23,7 @@ from nec_pd_sdk.nec_pd_sdk import PDAdvancedScheduleTuple
 from nec_pd_sdk.nec_pd_sdk import PDScheduleTuple
 from nec_pd_sdk.nec_pd_sdk import PDHolidayTuple
 from nec_pd_sdk.nec_pd_sdk import PDWeekendTuple
+from nec_pd_sdk.nec_pd_sdk import PDSchedule
 
 
 def reverse_dict(d):
@@ -35,72 +36,28 @@ def do_main_tests(pd, advanced):
             print("Testing: command_advanced_schedule_read")
             for x in range(1, 30):
                 value = pd.command_advanced_schedule_read(x)
-                if value.hour == 24 and value.minute == 60:
+                if pd.helper_schedule_is_empty(value):
                     print("Schedule ", x, " Is empty")
                 else:
                     print("command_advanced_schedule_read value: ", value) 
-                # print off time
-                if value.event == 2 and value.hour != 24 and value.minute != 60:
+                # print off time if schedule is NOT empty
+                if value.event == PDSchedule.OffEvent and not pd.helper_schedule_is_empty(value):
                     mytime=datetime.time(value.hour, value.minute);
                     print("Turn off time: ", mytime.isoformat())
-                # print on time
-                if value.event == 1 and value.hour != 24 and value.minute != 24:
+                # print on time if schedule is NOT empty
+                if value.event == PDSchedule.OnEvent and not pd.helper_schedule_is_empty(value):
                     mytime=datetime.time(value.hour, value.minute);
                     print("Turn on time: ", mytime.isoformat())
                 # print schedule type
                 enabled = 0;
-                if value.type & 0x01:
-                    print("Every Day");
-                elif value.type & 0x02:
-                    str = ""
-                    if value.week & 0x01:
-                        str += "Mon"
-                    if value.week & 0x02:
-                        if str != "":
-                            str += ", Tues"
-                        else:
-                            str += "Tues"
-                    if value.week & 0x04:
-                        if str != "":
-                            str += ", Wed"
-                        else:
-                            str += "Wed"
-                    if value.week & 0x08:
-                        if str != "":
-                            str += ", Thurs"
-                        else:
-                            str += "Thurs"
-                    if value.week & 0x10:
-                        if str != "":
-                            str += ", Fri"
-                        else:
-                            str += "Fri"
-                    if value.week & 0x20:
-                        if str != "":
-                            str += ", Sat"
-                        else:
-                            str += "Sat"
-                    if value.week & 0x40:
-                        if str != "":
-                            str += ", Sun"
-                        else:
-                            str += "Sun" 
-
-                    if not str:
-                        print("Specific Days")
-                    else:
-                        print("Every ", str)
-                elif value.type & 0x08:
-                    print("Weekdays")
-                elif value.type & 0x10:
-                    print("Weekends")
-                elif value.type & 0x20:
-                    print("Holidays")
-                elif value.type & 0x40:
+                print("Schedule type: ", pd.helper_schedule_type_string(value))
+                if pd.helper_schedule_is_every(value):
+                        print(str)
+                if pd.helper_schedule_is_one_day(value):
                     mydate = datetime.date(value.year, value.month, value.day);
                     print("One Day on ", mydate.isoformat())
 
-                if value.type & 0x04:
+                if pd.helper_schedule_is_enabled(value):
                     enabled = 1;
                     print ("Schedule is enabled")
                 else:
@@ -108,14 +65,21 @@ def do_main_tests(pd, advanced):
 
             print("\n\n")
             print("Testing: command_advanced_schedule_write")
+            #set type and enable
+            type = pd.helper_schedule_set_type(PDSchedule.SpecificDays, True)
+            print("Set type: ", type)
+            #set days
+            days = [PDSchedule.Saturday, PDSchedule.Sunday]
+            week = pd.helper_schedule_set_week(days)
+            print("Set Week: ", week)
             schedule = PDAdvancedScheduleTuple(status=0,
                                                program_no = 7,
                                                event = 1,
                                                hour = 8,
                                                minute = 0,
                                                input = 0,
-                                               week = 96,
-                                               type = 0x06,
+                                               week = week,
+                                               type = type,
                                                picture_mode = 0,
                                                year = 0,
                                                month = 0,
@@ -151,7 +115,7 @@ def do_main_tests(pd, advanced):
             holiday=PDHolidayTuple(status=0,
                                    id=30,
                                    type=2,
-                                   year=18,
+                                   year=2018,
                                    month=12,
                                    day=25,
                                    week_of_month=0,
@@ -170,58 +134,17 @@ def do_main_tests(pd, advanced):
             print("\n\n")
             print("Testing command_weekend_read")
             weekend = pd.command_weekend_read()
-            w = ''
-            if weekend.weekend & 0x01:
-                w += 'M '
-            if weekend.weekend & 0x02:
-                w += 'T '
-            if weekend.weekend & 0x04:
-                w += 'W '
-            if weekend.weekend & 0x08:
-                w += 'Th '
-            if weekend.weekend & 0x10:
-                w += 'F '
-            if weekend.weekend & 0x20:
-                w += 'S '
-            if weekend.weekend & 0x40:
-                w += 'Sn '
+            w = pd.helper_schedule_week_string(weekend.weekend)
             print("Weekend: ", w)
 
             print("\n\n")
             print("Testing command_weekend_write")
+            myWeekend = PDSchedule.Friday + PDSchedule.Saturday + PDSchedule.Sunday
             weekend = PDWeekendTuple(status=0,
-                                     weekend = 0x70)
+                                     weekend = myWeekend)
             create_weekend = pd.command_weekend_write(weekend)
-            w = ''
-            cw = ''
-            if weekend.weekend & 0x01:
-                w += 'M '
-            if create_weekend.weekend & 0x01:
-                cw += 'M '
-            if weekend.weekend & 0x02:
-                w += 'T '
-            if create_weekend.weekend & 0x02:
-                cw += 'T '
-            if weekend.weekend & 0x04:
-                w += 'W '
-            if create_weekend.weekend & 0x04:
-                cw += 'W '
-            if weekend.weekend & 0x08:
-                w += 'Th '
-            if create_weekend.weekend & 0x08:
-               cw += 'Th '
-            if weekend.weekend & 0x10:
-                w += 'F '
-            if create_weekend.weekend & 0x10:
-                cw += 'F '
-            if weekend.weekend & 0x20:
-                w += 'S '
-            if create_weekend.weekend & 0x20:
-                cw += 'S '
-            if weekend.weekend & 0x40:
-                w += 'Sn '
-            if create_weekend.weekend & 0x40:
-                cw += 'Sn '
+            w = pd.helper_schedule_week_string(weekend.weekend)
+            cw = pd.helper_schedule_week_string(create_weekend.weekend)
             print("Sent Weekend: ", w)
             print("Created Weekend: ", cw) 
 
