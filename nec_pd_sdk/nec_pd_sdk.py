@@ -14,9 +14,6 @@
 # opcode unsupported exception
 # POP reserved_1 decode
 
-# TODO == ATHLON 5 ==
-# schedule, holiday, weekend
-
 
 
 from collections import namedtuple
@@ -56,6 +53,41 @@ PDScheduleTuple = namedtuple('PDScheduleTuple', ['status',
                                                  'extension_5',
                                                  'extension_6',
                                                  'extension_7'])
+
+PDScheduleEnableDisableTuple = namedtuple('PDScheduleEnableDisable', ['status',
+                                                                      'program_no',
+                                                                      'enable_disable'])
+
+PDAdvancedScheduleTuple = namedtuple('PDAdvancedScheduleTuple', ['status',
+                                                 'program_no',
+                                                 'event',
+                                                 'hour',
+                                                 'minute',
+                                                 'input',
+                                                 'week',
+                                                 'type',
+                                                 'picture_mode',
+                                                 'year',
+                                                 'month',
+                                                 'day',
+                                                 'order',
+                                                 'extension_1',
+                                                 'extension_2',
+                                                 'extension_3'])
+
+PDHolidayTuple = namedtuple('PDHolidayTuple', ['status',
+                                        'id',
+                                        'type',
+                                        'year',
+                                        'month',
+                                        'day',
+                                        'week_of_month',
+                                        'day_of_week',
+                                        'end_month',
+                                        'end_day'])
+
+PDWeekendTuple = namedtuple('PDWeekendTuple', ['status',
+                                               'weekend'])
 
 PDDaylightSavingsTuple = namedtuple('PDDaylightSavingsTuple', ['status',
                                                                'begin_month',
@@ -837,6 +869,134 @@ class NECPD(object):
                                status=reply_status)
 
     @retry
+    def command_advanced_schedule_read(self, program_no):
+        """
+        Reads a schedule to the display. Note: program_no is 0 based (OSD is 1 based).
+
+        :param program_no: zero based program number (0 - 30)
+        :return: PDAdvancedScheduleTuple
+        """
+        #  Note: program_no is 0 based (OSD is 1 based)
+        logging.debug('program_no=%i', program_no)
+        send_data = []
+        assert 0 <= program_no <= 30 
+        send_data.extend(ascii_encode_value_4_bytes(0xC23D))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        return self.get_advanced_schedule_from_message(0xC23D, reply_message_type, reply_data)
+        
+
+    @retry
+    def command_advanced_schedule_write(self, program_no, schedule_in):
+        """
+        Writes a schedule to the display. Note: program_no is 0 based (OSD is 1 based).
+        Raises "PDCommandStatusReturnedError" if the returned status is not 'No Error'.
+
+        :param program_no: zero based program number (0 - 6)
+        :param schedule_in: PDAdvancedScheduleTuple
+        :return: PDAdvancedScheduleTuple
+        """
+        assert 0 <= program_no <= 30
+        assert 0 < schedule_in.event <= 2
+
+        assert 0 <= schedule_in.hour <= 24
+        assert 0 <= schedule_in.minute <= 60
+        assert 0 <= schedule_in.input <= 255
+        assert 0 <= schedule_in.week <= 0x7F
+        assert 0 <= schedule_in.picture_mode <= 255
+        #assert 0 <= schedule_in.year <= 255
+        #assert 0 <= schedule_in.month <= 255
+        #assert 0 <= schedule_in.day <= 255
+        #assert 0 <= schedule_in.order <= 255
+        assert 0 <= schedule_in.extension_1 <= 255
+        assert 0 <= schedule_in.extension_2 <= 255
+        assert 0 <= schedule_in.extension_3 <= 255
+        logging.debug('program_no=%i hour=%i minute=%i turn_off_hour=%i turn_off_minute=%i '
+                      'timer_input=%i week_setting=%i option=%i picture_mode=%i extension_1=%i extension_2=%i'
+                      ' extension_3=%i extension_4=%i extension_5=%i extension_6=%i extension_7=%i',
+                      schedule_in.hour,
+                      schedule_in.minute,
+                      schedule_in.input,
+                      schedule_in.week,
+                      schedule_in.type,
+                      schedule_in.picture_mode,
+                      schedule_in.year,
+                      schedule_in.month,
+                      schedule_in.day,
+                      schedule_in.order,
+                      schedule_in.extension_1,
+                      schedule_in.extension_2,
+                      schedule_in.extension_3)
+        send_data = []
+        send_data.extend(ascii_encode_value_4_bytes(0xC23E))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.event))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.hour))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.minute))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.input))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.week))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.type))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.picture_mode))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.year))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.month))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.day))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.order))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_1))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_2))
+        send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_3))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        return self.get_advanced_schedule_from_message(0xC23E, reply_message_type, reply_data)
+
+    @retry
+    def command_advanced_schedule_enable_disable(self, program_no, enable_disable):
+        """
+        Sends the command to enable or disable the schedule
+
+        :param program_no: zero based program number (0 - 30)
+        :param enable_disable: 1 for enable and 0 for disable
+        :return: PDScheduleEnableDisableTuple
+        """
+
+        send_data = []
+        assert 0 <= program_no <= 30 
+        send_data.extend(ascii_encode_value_4_bytes(0xC23F))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        send_data.extend(ascii_encode_value_2_bytes(enable_disable))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        if len(reply_data) != 10:
+            logging.error('unexpected reply length: %i (expected 10)', len(reply_data))
+            raise unexpectedReply
+        
+        if reply_message_type != 0x42:
+            logging.error('unexpected reply received')
+            raise unexpectedReply
+
+        if reply_data[0:4] != ascii_encode_value_4_bytes(0xC33F):
+            logging.error('unexpected reply received')
+            raise unexpectedReply
+
+        offset = 4;
+        parameter_len = 2;
+        reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len]) 
+        offset += parameter_len
+
+        reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        reply_enable_disable = ascii_decode_value(reply_data[offset:offset + parameter_len])
+
+        return PDScheduleEnableDisableTuple(status=reply_status,
+                                            program_no=reply_program_no,
+                                            enable_disable=reply_enable_disable)
+        
+
+    @retry
     def command_schedule_read(self, program_no):
         """
         Reads a schedule to the display. Note: program_no is 0 based (OSD is 1 based).
@@ -847,103 +1007,13 @@ class NECPD(object):
         #  Note: program_no is 0 based (OSD is 1 based)
         logging.debug('program_no=%i', program_no)
         send_data = []
-        assert 0 <= program_no <= 30
+        assert 0 <= program_no <= 7 
         send_data.extend(ascii_encode_value_4_bytes(0xC221))
         send_data.extend(ascii_encode_value_2_bytes(program_no))
         write_command(self.f, send_data, self.destination_address, 0x41)
         reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
-        if len(reply_data) == 36:
-            if reply_message_type != 0x42:
-                logging.error('unexpected reply received')
-                raise unexpectedReply
-            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC321):
-                logging.error('unexpected reply received')
-                raise unexpectedReply
-            offset = 4
-            # program_no
-            parameter_len = 2
-            reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # turn_on_hour
-            parameter_len = 2
-            reply_turn_on_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # turn_on_minute
-            parameter_len = 2
-            reply_turn_on_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # turn_off_hour
-            parameter_len = 2
-            reply_turn_off_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # turn_off_minute
-            parameter_len = 2
-            reply_turn_off_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # timer_input
-            parameter_len = 2
-            reply_timer_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # week_setting
-            parameter_len = 2
-            reply_week_setting = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # option
-            parameter_len = 2
-            reply_option = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # picture_mode
-            parameter_len = 2
-            reply_picture_mode = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_1
-            parameter_len = 2
-            reply_extension_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_2
-            parameter_len = 2
-            reply_extension_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_3
-            parameter_len = 2
-            reply_extension_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_4
-            parameter_len = 2
-            reply_extension_4 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_5
-            parameter_len = 2
-            reply_extension_5 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_6
-            parameter_len = 2
-            reply_extension_6 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_7
-            parameter_len = 2
-            reply_extension_7 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            return PDScheduleTuple(status=0,
-                                   program_no=reply_program_no,
-                                   turn_on_hour=reply_turn_on_hour,
-                                   turn_on_minute=reply_turn_on_minute,
-                                   turn_off_hour=reply_turn_off_hour,
-                                   turn_off_minute=reply_turn_off_minute,
-                                   timer_input=reply_timer_input,
-                                   week_setting=reply_week_setting,
-                                   option=reply_option,
-                                   picture_mode=reply_picture_mode,
-                                   extension_1=reply_extension_1,
-                                   extension_2=reply_extension_2,
-                                   extension_3=reply_extension_3,
-                                   extension_4=reply_extension_4,
-                                   extension_5=reply_extension_5,
-                                   extension_6=reply_extension_6,
-                                   extension_7=reply_extension_7)
-        else:
-            logging.error('unexpected reply length: %i (expected 36)', len(reply_data))
-            raise unexpectedReply
+
+        return self.get_schedule_from_message(0xC221, reply_message_type, reply_data)
 
     @retry
     def command_schedule_write(self, program_no, schedule_in):
@@ -955,7 +1025,7 @@ class NECPD(object):
         :param schedule_in: PDScheduleTuple
         :return: PDScheduleTuple
         """
-        assert 0 <= program_no <= 30
+        assert 0 <= program_no <= 7
         assert 0 <= schedule_in.turn_on_hour <= 24
         assert 0 <= schedule_in.turn_off_hour <= 24
         assert 0 <= schedule_in.turn_on_minute <= 60
@@ -1010,105 +1080,557 @@ class NECPD(object):
         send_data.extend(ascii_encode_value_2_bytes(schedule_in.extension_7))
         write_command(self.f, send_data, self.destination_address, 0x41)
         reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
-        if len(reply_data) == 38:
-            if reply_message_type != 0x42:
+
+        return self.get_schedule_from_message(0xC222, reply_message_type, reply_data)
+
+    @retry
+    def command_schedule_enable_disable(self, program_no, enable_disable):
+        """
+        Sends the command to enable or disable the schedule
+
+        :param program_no: zero based program number (0 - 30)
+        :param enable_disable: 1 for enable and 0 for disable
+        :return: PDScheduleEnableDisableTuple
+        """
+
+        send_data = []
+        assert 0 <= program_no <= 30 
+        send_data.extend(ascii_encode_value_4_bytes(0xC215))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        send_data.extend(ascii_encode_value_2_bytes(enable_disable))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        if len(reply_data) != 10:
+            logging.error('unexpected reply length: %i (expected 10)', len(reply_data))
+            raise unexpectedReply
+        
+        if reply_message_type != 0x42:
+            logging.error('unexpected reply received')
+            raise unexpectedReply
+
+        if reply_data[0:4] != ascii_encode_value_4_bytes(0xC315):
+            logging.error('unexpected reply received')
+            raise unexpectedReply
+
+        offset = 4;
+        parameter_len = 2;
+        reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len]) 
+        offset += parameter_len
+
+        reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        reply_enable_disable = ascii_decode_value(reply_data[offset:offset + parameter_len])
+
+        return PDScheduleEnableDisableTuple(status=reply_status,
+                                            program_no=reply_program_no,
+                                            enable_disable=reply_enable_disable)
+
+    def command_holiday_read(self, program_no):
+        """
+        Read the holiday from the device
+
+        :param program_no: The holiday to read
+        :return: PDHolidayTuple
+        """
+        send_data = []
+        assert 0 <= program_no <= 50 
+        send_data.extend(ascii_encode_value_4_bytes(0xCA19))
+        send_data.extend(ascii_encode_value_2_bytes(0))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        return self.get_holiday_from_message(program_no, 0x00, reply_message_type, reply_data)
+
+    def command_holiday_write(self, program_no, holiday):
+        """
+        Write the holiday
+
+        :param program_no: 0 based program number
+        :param holiday: PDHolidayTuple
+        :return: PDHolidayTuple
+        """
+
+        send_data = []
+        send_data.extend(ascii_encode_value_4_bytes(0xCA19))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(program_no))
+        send_data.extend(ascii_encode_value_2_bytes(holiday.type))
+        send_data.extend(ascii_encode_value_2_bytes(holiday.year))
+        send_data.extend(ascii_encode_value_2_bytes(holiday.month))
+        if holiday.type & 0x02:
+            send_data.extend(ascii_encode_value_2_bytes(holiday.day))
+        if holiday.type & 0x04:
+            send_data.extend(ascii_encode_value_2_bytes(0))
+            send_data.extend(ascii_encode_value_2_bytes(holiday.week_of_month))
+            send_data.extend(ascii_encode_value_2_bytes(holiday.day_of_week))
+        if holiday.type & 0x01:
+            send_data.extend(ascii_encode_value_2_bytes(0))
+            send_data.extend(ascii_encode_value_2_bytes(0))
+            send_data.extend(ascii_encode_value_2_bytes(holiday.end_month))
+            send_data.extend(ascii_encode_value_2_bytes(holiday.end_day))
+
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        return self.get_holiday_from_message(program_no, 0x01, reply_message_type, reply_data)
+
+    def command_weekend_read(self):
+        """
+        Read the weekend bitfield from the device
+
+        :return: PDWeekendTuple
+        """
+
+        send_data = []
+        send_data.extend(ascii_encode_value_4_bytes(0xCA1A))
+        send_data.extend(ascii_encode_value_2_bytes(0x00))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        if len(reply_data) != 8:
+            logging.error('unexpected reply length: %i (expected 8)', len(reply_data))
+            raise unexpectedReply
+        
+        if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB1A):
+            logging.error('unexpected reply')
+            raise unexpectedReply
+
+        offset = 4
+        parameter_len = 2
+        if reply_data[offset: offset + parameter_len] != ascii_encode_value_2_bytes(0x00):
+            logging.error('unexpected reply')
+            raise unexpectedReply
+
+        offset += parameter_len
+
+        weekend_bitfield = ascii_decode_value(reply_data[offset: offset + parameter_len])
+
+        return PDWeekendTuple(status=0,
+                              weekend=weekend_bitfield)
+
+    def command_weekend_write(self, weekend):
+        """
+        Write the weekend bitfield from the device
+
+        :param weekend: Weekend Bitfield to write
+        :return: PDWeekendTuple
+        """
+
+        send_data = []
+        send_data.extend(ascii_encode_value_4_bytes(0xCA1A))
+        send_data.extend(ascii_encode_value_2_bytes(0x01))
+        send_data.extend(ascii_encode_value_2_bytes(weekend.weekend))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+
+        if len(reply_data) != 10:
+            logging.error('unexpected reply length: %i (expected 10)', len(reply_data))
+            raise unexpectedReply
+        
+        if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB1A):
+            logging.error('unexpedted reply')
+            raise unexpectedReply
+
+        offset = 4
+        parameter_len = 2
+
+        if reply_data[offset: offset + parameter_len] != ascii_encode_value_2_bytes(0x01):
+            logging.error('unexpedted reply')
+            raise unexpectedReply
+
+        offset += parameter_len
+
+        status = ascii_decode_value(reply_data[offset: offset + parameter_len])
+        offset += parameter_len
+        weekend_bitfield = ascii_decode_value(reply_data[offset: offset + parameter_len])
+
+        return PDWeekendTuple(status=status,
+                              weekend=weekend_bitfield)
+
+
+    def get_schedule_from_message(self, command, reply_message_type, reply_data):
+        """
+        Processes the data from a schedule read or write and returns the schedule
+
+        :param command: Command that was send (read or write)
+        :param reply_message_type: Type of reply message received
+        :param reply_data: Data received in the reply
+        :return: PDScheduleTuple
+        """
+
+        # Initial offset is 4
+        offset = 4
+ 
+        # Data length default
+        data_len = 0
+
+        # Reply status default
+        reply_status = 0
+
+        # Read Command
+        # Set length and check received command
+        if command == 0xC221:
+            data_len = 36
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC321):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
+        # Write Commmand
+        # Set length, check received command and get status
+        elif command == 0xC222:
+            data_len = 38
             if reply_data[0:4] != ascii_encode_value_4_bytes(0xC322):
                 logging.error('unexpected reply received')
                 raise unexpectedReply
-            offset = 4
-            # status
+    
             parameter_len = 2
             reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            if reply_status != 0:
-                logging.error('reply status is not 0')
-                raise commandStatusReturnedError
             offset += parameter_len
-            # program_no
+
+        # Check the length
+        if len(reply_data) != data_len:
+            logging.error('unexpected reply length: %i (expected %i)', len(reply_data), data_len)
+            raise unexpectedReply
+    
+        # Check the replay type
+        if reply_message_type != 0x42:
+            logging.error('unexpected reply received')
+            raise unexpectedReply
+
+        # Set default "null" values
+        reply_hour = 24
+        reply_minute = 60
+        reply_event = 0
+
+        # Parameter length is 2 for all the params.  
+        parameter_len = 2
+
+        # program_no
+        reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # turn_on_hour
+        reply_turn_on_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # turn_on_minute
+        reply_turn_on_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # turn_off_hour
+        reply_turn_off_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # turn_off_minute
+        reply_turn_off_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # timer_input
+        reply_timer_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # week_setting
+        reply_week_setting = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # option
+        reply_option = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # picture_mode
+        reply_picture_mode = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_1
+        reply_extension_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_2
+        reply_extension_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_3
+        reply_extension_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_4
+        reply_extension_4 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_5
+        reply_extension_5 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_6
+        reply_extension_6 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_7
+        reply_extension_7 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        return PDScheduleTuple(status=0,
+                               program_no=reply_program_no,
+                               turn_on_hour=reply_turn_on_hour,
+                               turn_on_minute=reply_turn_on_minute,
+                               turn_off_hour=reply_turn_off_hour,
+                               turn_off_minute=reply_turn_off_minute,
+                               timer_input=reply_timer_input,
+                               week_setting=reply_week_setting,
+                               option=reply_option,
+                               picture_mode=reply_picture_mode,
+                               extension_1=reply_extension_1,
+                               extension_2=reply_extension_2,
+                               extension_3=reply_extension_3,
+                               extension_4=reply_extension_4,
+                               extension_5=reply_extension_5,
+                               extension_6=reply_extension_6,
+                               extension_7=reply_extension_7)
+
+    def get_advanced_schedule_from_message(self, command, reply_message_type, reply_data):
+        """
+        Processes the data from an advanced schedule read or write and returns the schedule
+      
+        :param command: Command that was sent (read or write)
+        :param reply_message_type: Type of reply message received
+        :param reply_data: Data received in the reply
+        :return: PDAdvancedScheduleTuple
+        """
+
+        # Initial offset is 4 
+        offset = 4
+   
+        # Data length default
+        data_len = 0
+    
+        # Reply status default
+        reply_status = 0
+    
+        # Read Command
+        # Set length and check received command
+        if command == 0xC23D:
+            data_len = 34
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC33D):
+                logging.error('unexpected reply received')
+                raise unexpectedReply
+        # Write Commmand
+        # Set length, check received command and get status
+        elif command == 0xC23E:
+            data_len = 36
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC33E):
+                logging.error('unexpected reply received')
+                raise unexpectedReply
+    
             parameter_len = 2
-            reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
+            reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
             offset += parameter_len
-            # turn_on_hour
-            parameter_len = 2
-            reply_turn_on_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # turn_on_minute
-            parameter_len = 2
-            reply_turn_on_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # turn_off_hour
-            parameter_len = 2
-            reply_turn_off_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # turn_off_minute
-            parameter_len = 2
-            reply_turn_off_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # timer_input
-            parameter_len = 2
-            reply_timer_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # week_setting
-            parameter_len = 2
-            reply_week_setting = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # option
-            parameter_len = 2
-            reply_option = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # picture_mode
-            parameter_len = 2
-            reply_picture_mode = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_1
-            parameter_len = 2
-            reply_extension_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_2
-            parameter_len = 2
-            reply_extension_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_3
-            parameter_len = 2
-            reply_extension_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_4
-            parameter_len = 2
-            reply_extension_4 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_5
-            parameter_len = 2
-            reply_extension_5 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_6
-            parameter_len = 2
-            reply_extension_6 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            # extension_7
-            parameter_len = 2
-            reply_extension_7 = ascii_decode_value(reply_data[offset:offset + parameter_len])
-            offset += parameter_len
-            return PDScheduleTuple(status=reply_status,
+
+        # Check the length
+        if len(reply_data) != data_len:
+            logging.error('unexpected reply length: %i (expected %i)', len(reply_data), data_len)
+            raise unexpectedReply
+    
+        # Check the replay type
+        if reply_message_type != 0x42:
+            logging.error('unexpected reply received')
+            raise unexpectedReply
+
+        # Set default "null" values
+        reply_hour = 24
+        reply_minute = 60
+        reply_event = 0
+
+        # Parameter length is 2 for all the params.  
+        parameter_len = 2
+
+        # program_no
+        reply_program_no = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # event
+        reply_event = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+        if reply_event < 1 or reply_event > 2:
+            logging.error('unexpected reply event: %i (expected 1 or 2)', reply_event)
+            raise unexpectedReply
+
+        # Get the hour and minute
+        reply_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+        reply_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # input
+        reply_input = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+ 
+        # week
+        reply_week = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # type
+        reply_type = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # picture_mode
+        reply_picture_mode = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # year
+        reply_year = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # month
+        reply_month = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # day
+        reply_day = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # order
+        reply_order = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_1
+        reply_extension_1 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_2
+        reply_extension_2 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        # extension_3
+        reply_extension_3 = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        offset += parameter_len
+
+        return PDAdvancedScheduleTuple(status=reply_status,
                                    program_no=reply_program_no,
-                                   turn_on_hour=reply_turn_on_hour,
-                                   turn_on_minute=reply_turn_on_minute,
-                                   turn_off_hour=reply_turn_off_hour,
-                                   turn_off_minute=reply_turn_off_minute,
-                                   timer_input=reply_timer_input,
-                                   week_setting=reply_week_setting,
-                                   option=reply_option,
+                                   event=reply_event,
+                                   hour=reply_hour,
+                                   minute=reply_minute,
+                                   input=reply_input,
+                                   week=reply_week,
+                                   type=reply_type,
                                    picture_mode=reply_picture_mode,
+                                   year=reply_year,
+                                   month=reply_month,
+                                   day=reply_day,
+                                   order=reply_order,
                                    extension_1=reply_extension_1,
                                    extension_2=reply_extension_2,
-                                   extension_3=reply_extension_3,
-                                   extension_4=reply_extension_4,
-                                   extension_5=reply_extension_5,
-                                   extension_6=reply_extension_6,
-                                   extension_7=reply_extension_7)
-        else:
-            logging.error('unexpected reply length: %i (expected 38)', len(reply_data))
+                                   extension_3=reply_extension_3)
+
+
+    def get_holiday_from_message(this, program_no, command, reply_message_type, reply_data):
+        """
+        Processes the data from a holiday read or write and returns the holiday
+      
+        :param program_no: The holiday number
+        :param command: Command that was sent (read or write)
+        :param reply_message_type: Type of reply message received
+        :param reply_data: Data received in the reply
+        :return: PDHolidayTuple
+        """
+        # Initial offset is 6 
+        offset = 6
+   
+        # Data length default
+        data_len = 0
+    
+        # Reply status default
+        reply_status = 0
+    
+        # Read Command
+        # Set length and check received command
+        if command == 0x00:
+            data_len = 24
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB19) and reply_data[5:6] != ascii_encode_value_2_bytes(0x00):
+                logging.error('1 unexpected reply received')
+                raise unexpectedReply
+        # Write Commmand
+        # Set length, check received command and get status
+        elif command == 0x01:
+            data_len = 26
+            print("reply_data[5:6]: ", reply_data[5:6])
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xCB19) and reply_data[4:5] != ascii_encode_value_2_bytes(0x01):
+                logging.error('2 unexpected reply received')
+                raise unexpectedReply
+    
+            parameter_len = 2
+            reply_status = ascii_decode_value(reply_data[offset:offset + parameter_len])
+            offset += parameter_len
+
+        # Check the length
+        if len(reply_data) != data_len:
+            logging.error('3 unexpected reply length: %i (expected %i)', len(reply_data), data_len)
             raise unexpectedReply
+    
+        # Check the reply type
+        if reply_message_type != 0x42:
+            logging.error('4 unexpected reply received')
+            raise unexpectedReply
+
+        # Parameter length is 2 for all the params.  
+        parameter_len = 2
+
+        reply_id = ascii_decode_value(reply_data[offset: offset + parameter_len])
+        offset += parameter_len
+   
+        if (reply_id != program_no):
+            logging.error('5 unexpected reply received')
+            raise unexpectedReply
+ 
+        reply_type = ascii_decode_value(reply_data[offset: offset + parameter_len])
+        offset += parameter_len
+
+        reply_year = ascii_decode_value(reply_data[offset: offset + parameter_len])
+        offset += parameter_len
+
+        reply_month = ascii_decode_value(reply_data[offset: offset + parameter_len])
+        offset += parameter_len
+
+        # Initialize Values
+        reply_day = 0
+        reply_end_month = 0
+        reply_end_day = 0
+        reply_week_of_month = 0
+        reply_day_of_week = 0
+        
+        # Single Date
+        if reply_type & 0x02:
+            reply_day = ascii_decode_value(reply_data[offset: offset + parameter_len])
+            offset += parameter_len
+
+            # Date Range
+            if reply_type & 0x01:
+                # Spec is wrong, so need to skip the next 4 
+                offset += 4
+                reply_end_month = ascii_decode_value(reply_data[offset: offset + parameter_len])
+                offset += parameter_len
+                reply_end_day = ascii_decode_value(reply_data[offset: offset + parameter_len])
+                offset += parameter_len
+        elif reply_type & 0x04:
+            # Spec is wrong, so need to skip the next 2
+            offset += parameter_len
+            reply_week_of_month = ascii_decode_value(reply_data[offset: offset + parameter_len])
+            offset += parameter_len
+            reply_day_of_week = ascii_decode_value(reply_data[offset: offset + parameter_len])
+            offset += parameter_len
+
+        return PDHolidayTuple(status=reply_status,
+                              id=reply_id,
+                              type=reply_type,
+                              year=reply_year,
+                              month=reply_month,
+                              day=reply_day,
+                              week_of_month=reply_week_of_month,
+                              day_of_week=reply_day_of_week,
+                              end_month=reply_end_month,
+                              end_day=reply_end_day)  
+         
 
     @retry
     def command_lan_mac_address_read(self):
@@ -3512,6 +4034,7 @@ class NECPD(object):
         :param number: log number to read (1=first)
         :return: PDHelperProofOfPlayLogItemTuple
         """
+
         logging.debug('number=%i', number)
         reply = self.command_get_proof_of_play_number_to_number(number, number)
         return PDHelperProofOfPlayLogItemTuple(status=reply.status,
@@ -3529,3 +4052,42 @@ class NECPD(object):
                                                reserved_2=reply.reserved_2,
                                                reserved_3=reply.reserved_3)
 
+
+    def helper_read_schedules(self):
+        """
+        Helper function to read all the schedules and return them as a list of schedules
+
+        :return: A list of PDScheduleTuple
+        """
+
+        reply = []
+        for x in range (1, 7):
+            reply.append(self.command_schedule_read(x))
+
+        return reply
+
+    def helper_read_advanced_schedules(self):
+        """
+        Helper function to read all the advanced schedules and return them as a list of schedules
+
+        :return: A list of PDAdvancedScheduleTuple
+        """
+
+        reply = []
+        for x in range (1, 30):
+            reply.append(self.command_advanced_schedule_read(x))
+
+        return reply
+
+    def helper_read_holidays(self):
+        """
+        Helper function to reall all the holidays and return them as a list of holidays
+
+        :return: A list of PDHolidayTuple
+        """
+
+        reply = []
+        for x in range (1, 50):
+            reply.append(self.command_holiday_read(x))
+
+        return reply

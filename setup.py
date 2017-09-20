@@ -21,7 +21,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='17.4.61',
+    version='17.9.70',
 
     description='NEC PD SDK',
     long_description=long_description,

@@ -26,7 +26,6 @@ def reverse_dict(d):
 
 def do_main_tests(pd):
     try:
-
         print("Testing: helper_asset_data_read")
         value = pd.helper_asset_data_read()
         print("helper_asset_data_read value: ", value)
