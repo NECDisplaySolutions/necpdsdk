@@ -1488,6 +1488,7 @@ class NECPD(object):
 
         # Get the hour and minute
         reply_hour = ascii_decode_value(reply_data[offset:offset + parameter_len])
+        logging.debug('reply_hour  "%s"', reply_hour)
         offset += parameter_len
         reply_minute = ascii_decode_value(reply_data[offset:offset + parameter_len])
         offset += parameter_len
@@ -4128,7 +4129,7 @@ class NECPD(object):
 
         return reply
 
-    def helper_schedule_is_empty(self, schedule):
+    def helper_advanced_schedule_is_empty(self, schedule):
         """
         Helper function to determin if the schedule is empty
 
@@ -4142,7 +4143,7 @@ class NECPD(object):
 
         return reply
     
-    def helper_schedule_is_enabled(self, schedule):
+    def helper_advanced_schedule_is_enabled(self, schedule):
         """
         Helper function to determin if the schedule is enabled
 
@@ -4156,7 +4157,7 @@ class NECPD(object):
 
         return reply
 
-    def helper_schedule_is_every_day(self, schedule):
+    def helper_advanced_schedule_is_every_day(self, schedule):
         """
         Helper function to determine if the schedule type is Every Day
 
@@ -4170,7 +4171,7 @@ class NECPD(object):
 
         return reply
 
-    def helper_schedule_is_every(self, schedule):
+    def helper_advanced_schedule_is_every(self, schedule):
         """
         Helper function to determine if the schedule type is Every 
 
@@ -4184,7 +4185,7 @@ class NECPD(object):
 
         return reply
 
-    def helper_schedule_is_specific_days(self, schedule):
+    def helper_advanced_schedule_is_specific_days(self, schedule):
         """
         Helper function to determine if the schedule type is Specific Days 
 
@@ -4198,7 +4199,7 @@ class NECPD(object):
 
         return reply
 
-    def helper_schedule_is_weekdays(self, schedule):
+    def helper_advanced_schedule_is_weekdays(self, schedule):
         """
         Helper function to determine if the schedule type is Weekdays
 
@@ -4212,7 +4213,7 @@ class NECPD(object):
 
         return reply
  
-    def helper_schedule_is_weekends(self, schedule):
+    def helper_advanced_schedule_is_weekends(self, schedule):
         """
         Helper function to determine if the schedule type is Weekends
 
@@ -4226,7 +4227,7 @@ class NECPD(object):
 
         return reply
  
-    def helper_schedule_is_holidays(self, schedule):
+    def helper_advanced_schedule_is_holidays(self, schedule):
         """
         Helper function to determine if the schedule type is holidays
 
@@ -4240,7 +4241,7 @@ class NECPD(object):
 
         return reply
  
-    def helper_schedule_is_one_day(self, schedule):
+    def helper_advanced_schedule_is_one_day(self, schedule):
         """
         Helper function to determine if the schedule type is one_day
 
@@ -4254,7 +4255,7 @@ class NECPD(object):
 
         return reply
  
-    def helper_schedule_type_string(self, schedule):
+    def helper_advanced_schedule_type_string(self, schedule):
         """
         Helper function to return the type string
 
@@ -4281,7 +4282,7 @@ class NECPD(object):
 
         return str
 
-    def helper_schedule_week_string(self, week):
+    def helper_advanced_schedule_week_string(self, week):
         """
         Helper function to get the week string
 
@@ -4319,7 +4320,7 @@ class NECPD(object):
 
         return str;
 
-    def helper_schedule_set_type(self, type, enable):
+    def helper_advanced_schedule_set_type(self, type, enable):
         """
         Set the schedule type.  If enable is True, then also include
         the enable bit in the schedule.
@@ -4335,7 +4336,7 @@ class NECPD(object):
 
         return schedType
 
-    def helper_schedule_set_week(self, week):
+    def helper_advanced_schedule_set_week(self, week):
         """
         Set the week.
 

@@ -36,41 +36,75 @@ def do_main_tests(pd, advanced):
             print("Testing: command_advanced_schedule_read")
             for x in range(1, 30):
                 value = pd.command_advanced_schedule_read(x)
-                if pd.helper_schedule_is_empty(value):
+                if pd.helper_advanced_schedule_is_empty(value):
                     print("Schedule ", x, " Is empty")
                 else:
                     print("command_advanced_schedule_read value: ", value) 
                 # print off time if schedule is NOT empty
-                if value.event == PDSchedule.OffEvent and not pd.helper_schedule_is_empty(value):
-                    mytime=datetime.time(value.hour, value.minute);
+                if value.event == PDSchedule.OffEvent and not pd.helper_advanced_schedule_is_empty(value):
+                    hour = 0
+                    minute = 0
+                    if value.hour < 24:
+                        hour = value.hour
+                    if value.minute < 60:
+                        minute = value.minute
+                    mytime=datetime.time(hour, minute);
                     print("Turn off time: ", mytime.isoformat())
                 # print on time if schedule is NOT empty
-                if value.event == PDSchedule.OnEvent and not pd.helper_schedule_is_empty(value):
-                    mytime=datetime.time(value.hour, value.minute);
+                if value.event == PDSchedule.OnEvent and not pd.helper_advanced_schedule_is_empty(value):
+                    hour = 0
+                    minute = 0
+                    if value.hour < 24:
+                        hour = value.hour
+                    if value.minute < 60:
+                        minute = value.minute
+                    print("hour: ", hour, " min: ", minute)
+                    mytime=datetime.time(hour, minute);
                     print("Turn on time: ", mytime.isoformat())
                 # print schedule type
                 enabled = 0;
-                print("Schedule type: ", pd.helper_schedule_type_string(value))
-                if pd.helper_schedule_is_every(value):
+                print("Schedule type: ", pd.helper_advanced_schedule_type_string(value))
+                if pd.helper_advanced_schedule_is_every(value):
                         print(str)
-                if pd.helper_schedule_is_one_day(value):
-                    mydate = datetime.date(value.year, value.month, value.day);
-                    print("One Day on ", mydate.isoformat())
+                if pd.helper_advanced_schedule_is_one_day(value):
+                    year = 2100
+                    month = 13
+                    day = 32
+                    print("actual: ", value.year, "-", value.month, "-", value.day)
+                    datestr = "NULL"
+                    if value.year < 2100:
+                        year = value.year
+                        datestr += str(year)
+                        datestr += "-"
+                    if value.month < 13:
+                        month = value.month
+                        datestr += str(month)
+                        datestr += "-"
+                    if value.day < 32:
+                        day = value.day
+                        datestr += str(day)
+                    if year < 2100 and month < 13 and day < 32:
+                        mydate = datetime.date(year, month, day)
+                        print("One Day on ", mydate.isoformat())
+                    else:
+                        print("One Day on ", datestr)
 
-                if pd.helper_schedule_is_enabled(value):
+                if pd.helper_advanced_schedule_is_enabled(value):
                     enabled = 1;
                     print ("Schedule is enabled")
                 else:
                     print ("Schedule is disabled")
 
+                print ("\n\n")
+
             print("\n\n")
             print("Testing: command_advanced_schedule_write")
             #set type and enable
-            type = pd.helper_schedule_set_type(PDSchedule.SpecificDays, True)
+            type = pd.helper_advanced_schedule_set_type(PDSchedule.SpecificDays, True)
             print("Set type: ", type)
             #set days
             days = [PDSchedule.Saturday, PDSchedule.Sunday]
-            week = pd.helper_schedule_set_week(days)
+            week = pd.helper_advanced_schedule_set_week(days)
             print("Set Week: ", week)
             schedule = PDAdvancedScheduleTuple(status=0,
                                                program_no = 7,
@@ -134,7 +168,7 @@ def do_main_tests(pd, advanced):
             print("\n\n")
             print("Testing command_weekend_read")
             weekend = pd.command_weekend_read()
-            w = pd.helper_schedule_week_string(weekend.weekend)
+            w = pd.helper_advanced_schedule_week_string(weekend.weekend)
             print("Weekend: ", w)
 
             print("\n\n")
@@ -143,8 +177,8 @@ def do_main_tests(pd, advanced):
             weekend = PDWeekendTuple(status=0,
                                      weekend = myWeekend)
             create_weekend = pd.command_weekend_write(weekend)
-            w = pd.helper_schedule_week_string(weekend.weekend)
-            cw = pd.helper_schedule_week_string(create_weekend.weekend)
+            w = pd.helper_advanced_schedule_week_string(weekend.weekend)
+            cw = pd.helper_advanced_schedule_week_string(create_weekend.weekend)
             print("Sent Weekend: ", w)
             print("Created Weekend: ", cw) 
 
