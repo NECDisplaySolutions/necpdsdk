@@ -4,40 +4,44 @@ NAME
     nec_pd_sdk - nec_pd_sdk.py - High level functions for communicating via LAN or RS232 with NEC large-screen displays.
 
 FILE
-    \nec_pd_sdk\nec_pd_sdk.py
-
-DESCRIPTION
-    Revision: 170322
+    /home/pi/development/necpdsdk/nec_pd_sdk/nec_pd_sdk.py
 
 CLASSES
     __builtin__.object
         NECPD
     __builtin__.tuple(__builtin__.object)
+        PDAdvancedScheduleTuple
         PDAutoTileMatrixTuple
         PDDateTimeTuple
         PDDaylightSavingsTuple
         PDHelperProofOfPlayLogItemTuple
+        PDHolidayTuple
         PDOpCodeGetSetTuple
         PDPIPPBPProfileTuple
         PDProofOfPlayLogItemTuple
         PDProofOfPlayStatusTuple
+        PDScheduleEnableDisable
         PDScheduleTuple
         PDTileMatrixProfileTuple
-    serial.serialwin32.Serial(serial.serialutil.SerialBase)
+        PDWeekendTuple
+    PDSchedule
+    serial.serialposix.Serial(serial.serialutil.SerialBase, serial.serialposix.PlatformSpecific)
         MySerial
     
-    class MySerial(serial.serialwin32.Serial)
+    class MySerial(serial.serialposix.Serial)
      |  Add our own functions for serial support to mimic those in 'socket', so we can use the same
      |  function names.
      |  
      |  Method resolution order:
      |      MySerial
-     |      serial.serialwin32.Serial
+     |      serial.serialposix.Serial
      |      serial.serialutil.SerialBase
      |      io.RawIOBase
      |      _io._RawIOBase
      |      io.IOBase
      |      _io._IOBase
+     |      serial.serialposix.PlatformSpecific
+     |      serial.serialposix.PlatformSpecificBase
      |      __builtin__.object
      |  
      |  Methods defined here:
@@ -54,22 +58,25 @@ CLASSES
      |  __abstractmethods__ = frozenset([])
      |  
      |  ----------------------------------------------------------------------
-     |  Methods inherited from serial.serialwin32.Serial:
-     |  
-     |  __init__(self, *args, **kwargs)
+     |  Methods inherited from serial.serialposix.Serial:
      |  
      |  cancel_read(self)
-     |      Cancel a blocking read operation, may be called from other thread
      |  
      |  cancel_write(self)
-     |      Cancel a blocking write operation, may be called from other thread
      |  
      |  close(self)
      |      Close port
      |  
+     |  fileno(self)
+     |      For easier use of the serial port instance with select.
+     |      WARNING: this function is not portable to different platforms!
+     |  
      |  flush(self)
      |      Flush of file like objects. In this case, wait until all data
      |      is written.
+     |  
+     |  nonblocking(self)
+     |      DEPRECATED - has no use
      |  
      |  open(self)
      |      Open port with current settings. This may throw a SerialException
@@ -87,21 +94,25 @@ CLASSES
      |      Clear output buffer, aborting the current output and discarding all
      |      that is in the buffer.
      |  
-     |  set_buffer_size(self, rx_size=4096, tx_size=None)
-     |      Recommend a buffer size to the driver (device driver can ignore this
-     |      value). Must be called before the port is opened.
+     |  send_break(self, duration=0.25)
+     |      Send break condition. Timed, returns to idle state after given
+     |      duration.
+     |  
+     |  set_input_flow_control(self, enable=True)
+     |      Manually control flow - when software flow control is enabled.
+     |      This will send XON (true) or XOFF (false) to the other device.
+     |      WARNING: this function is not portable to different platforms!
      |  
      |  set_output_flow_control(self, enable=True)
-     |      Manually control flow - when software flow control is enabled.
-     |      This will do the same as if XON (true) or XOFF (false) are received
-     |      from the other device and control the transmission accordingly.
+     |      Manually control flow of outgoing data - when hardware or software flow
+     |      control is enabled.
      |      WARNING: this function is not portable to different platforms!
      |  
      |  write(self, data)
      |      Output the given byte string over the serial port.
      |  
      |  ----------------------------------------------------------------------
-     |  Data descriptors inherited from serial.serialwin32.Serial:
+     |  Data descriptors inherited from serial.serialposix.Serial:
      |  
      |  cd
      |      Read terminal status line: Carrier Detect
@@ -112,22 +123,14 @@ CLASSES
      |  dsr
      |      Read terminal status line: Data Set Ready
      |  
-     |  exclusive
-     |      Get the current exclusive access setting.
-     |  
      |  in_waiting
      |      Return the number of bytes currently in the input buffer.
      |  
      |  out_waiting
-     |      Return how many bytes the in the outgoing buffer
+     |      Return the number of bytes currently in the output buffer.
      |  
      |  ri
      |      Read terminal status line: Ring Indicator
-     |  
-     |  ----------------------------------------------------------------------
-     |  Data and other attributes inherited from serial.serialwin32.Serial:
-     |  
-     |  BAUDRATES = (50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4...
      |  
      |  ----------------------------------------------------------------------
      |  Methods inherited from serial.serialutil.SerialBase:
@@ -135,6 +138,11 @@ CLASSES
      |  __enter__(self)
      |  
      |  __exit__(self, *args, **kwargs)
+     |  
+     |  __init__(self, port=None, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=None, xonxoff=False, rtscts=False, write_timeout=None, dsrdtr=False, inter_byte_timeout=None, **kwargs)
+     |      Initialize comm port object. If a "port" is given, then the port will be
+     |      opened immediately. Otherwise a Serial port object in closed state
+     |      is returned.
      |  
      |  __repr__(self)
      |      String representation of the current port settings and its state.
@@ -187,10 +195,6 @@ CLASSES
      |  seekable(self)
      |  
      |  sendBreak(self, duration=0.25)
-     |  
-     |  send_break(self, duration=0.25)
-     |      Send break condition. Timed, returns to idle state after given
-     |      duration.
      |  
      |  setDTR(self, value=1)
      |  
@@ -254,6 +258,8 @@ CLASSES
      |  ----------------------------------------------------------------------
      |  Data and other attributes inherited from serial.serialutil.SerialBase:
      |  
+     |  BAUDRATES = (50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4...
+     |  
      |  BYTESIZES = (5, 6, 7, 8)
      |  
      |  PARITIES = ('N', 'E', 'O', 'M', 'S')
@@ -287,11 +293,6 @@ CLASSES
      |  
      |  __iter__(...)
      |      x.__iter__() <==> iter(x)
-     |  
-     |  fileno(...)
-     |      Returns underlying file descriptor if one exists.
-     |      
-     |      An IOError is raised if the IO object does not use a file descriptor.
      |  
      |  isatty(...)
      |      Return whether this is an 'interactive' stream.
@@ -351,6 +352,20 @@ CLASSES
      |  
      |  __new__ = <built-in method __new__ of type object>
      |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from serial.serialposix.PlatformSpecific:
+     |  
+     |  BAUDRATE_CONSTANTS = {0: 0, 50: 1, 75: 2, 110: 3, 134: 4, 150: 5, 200:...
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from serial.serialposix.PlatformSpecificBase:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
     
     class NECPD(__builtin__.object)
      |  Main class for all communications and commands with NEC large-screen displays.
@@ -361,6 +376,12 @@ CLASSES
      |  
      |  close(self)
      |      Closes socket.
+     |  
+     |  command_advanced_schedule_enable_disable = _retry(self, *args, **kwargs)
+     |  
+     |  command_advanced_schedule_read = _retry(self, *args, **kwargs)
+     |  
+     |  command_advanced_schedule_write = _retry(self, *args, **kwargs)
      |  
      |  command_asset_data_read = _retry(self, *args, **kwargs)
      |  
@@ -426,6 +447,19 @@ CLASSES
      |  
      |  command_get_timing_report = _retry(self, *args, **kwargs)
      |  
+     |  command_holiday_read(self, program_no)
+     |      Read the holiday from the device
+     |      
+     |      :param program_no: The holiday to read
+     |      :return: PDHolidayTuple
+     |  
+     |  command_holiday_write(self, program_no, holiday)
+     |      Write the holiday
+     |      
+     |      :param program_no: 0 based program number
+     |      :param holiday: PDHolidayTuple
+     |      :return: PDHolidayTuple
+     |  
      |  command_input_name_of_designated_terminal_read = _retry(self, *args, **kwargs)
      |  
      |  command_input_name_of_designated_terminal_reset = _retry(self, *args, **kwargs)
@@ -437,6 +471,8 @@ CLASSES
      |  command_input_name_reset = _retry(self, *args, **kwargs)
      |  
      |  command_input_name_write = _retry(self, *args, **kwargs)
+     |  
+     |  command_ip_address_read = _retry(self, *args, **kwargs)
      |  
      |  command_lan_mac_address_read = _retry(self, *args, **kwargs)
      |  
@@ -457,6 +493,8 @@ CLASSES
      |  command_power_status_set = _retry(self, *args, **kwargs)
      |  
      |  command_save_current_settings = _retry(self, *args, **kwargs)
+     |  
+     |  command_schedule_enable_disable = _retry(self, *args, **kwargs)
      |  
      |  command_schedule_read = _retry(self, *args, **kwargs)
      |  
@@ -483,6 +521,122 @@ CLASSES
      |  command_tile_matrix_profile_contents_write = _retry(self, *args, **kwargs)
      |  
      |  command_tile_matrix_profile_write = _retry(self, *args, **kwargs)
+     |  
+     |  command_weekend_read(self)
+     |      Read the weekend bitfield from the device
+     |      
+     |      :return: PDWeekendTuple
+     |  
+     |  command_weekend_write(self, weekend)
+     |      Write the weekend bitfield from the device
+     |      
+     |      :param weekend: Weekend Bitfield to write
+     |      :return: PDWeekendTuple
+     |  
+     |  get_advanced_schedule_from_message(self, command, reply_message_type, reply_data)
+     |      Processes the data from an advanced schedule read or write and returns the schedule
+     |      
+     |      :param command: Command that was sent (read or write)
+     |      :param reply_message_type: Type of reply message received
+     |      :param reply_data: Data received in the reply
+     |      :return: PDAdvancedScheduleTuple
+     |  
+     |  get_holiday_from_message(this, program_no, command, reply_message_type, reply_data)
+     |      Processes the data from a holiday read or write and returns the holiday
+     |      
+     |      :param program_no: The holiday number
+     |      :param command: Command that was sent (read or write)
+     |      :param reply_message_type: Type of reply message received
+     |      :param reply_data: Data received in the reply
+     |      :return: PDHolidayTuple
+     |  
+     |  get_schedule_from_message(self, command, reply_message_type, reply_data)
+     |      Processes the data from a schedule read or write and returns the schedule
+     |      
+     |      :param command: Command that was send (read or write)
+     |      :param reply_message_type: Type of reply message received
+     |      :param reply_data: Data received in the reply
+     |      :return: PDScheduleTuple
+     |  
+     |  helper_advanced_schedule_is_empty(self, schedule)
+     |      Helper function to determin if the schedule is empty
+     |      
+     |      :param schedule: Schedule
+     |      :return: True if the scheule is empty
+     |  
+     |  helper_advanced_schedule_is_enabled(self, schedule)
+     |      Helper function to determin if the schedule is enabled
+     |      
+     |      :param schedule: Schedule
+     |      :return: True if the scheule is enabled
+     |  
+     |  helper_advanced_schedule_is_every(self, schedule)
+     |      Helper function to determine if the schedule type is Every 
+     |      
+     |      :param schedule: Schedule 
+     |      :return: True if the schedule type is every
+     |  
+     |  helper_advanced_schedule_is_every_day(self, schedule)
+     |      Helper function to determine if the schedule type is Every Day
+     |      
+     |      :param schedule: Schedule 
+     |      :return: True if the schedule type is every day.
+     |  
+     |  helper_advanced_schedule_is_holidays(self, schedule)
+     |      Helper function to determine if the schedule type is holidays
+     |      
+     |      :param schedule: Schedule 
+     |      :return: True if the schedule type is holidays
+     |  
+     |  helper_advanced_schedule_is_one_day(self, schedule)
+     |      Helper function to determine if the schedule type is one_day
+     |      
+     |      :param schedule: Schedule 
+     |      :return: True if the schedule type is one_day
+     |  
+     |  helper_advanced_schedule_is_specific_days(self, schedule)
+     |      Helper function to determine if the schedule type is Specific Days 
+     |      
+     |      :param schedule: Schedule 
+     |      :return: True if the schedule type is specific days
+     |  
+     |  helper_advanced_schedule_is_weekdays(self, schedule)
+     |      Helper function to determine if the schedule type is Weekdays
+     |      
+     |      :param schedule: Schedule 
+     |      :return: True if the schedule type is Weekdays
+     |  
+     |  helper_advanced_schedule_is_weekends(self, schedule)
+     |      Helper function to determine if the schedule type is Weekends
+     |      
+     |      :param schedule: Schedule 
+     |      :return: True if the schedule type is Weekends
+     |  
+     |  helper_advanced_schedule_set_type(self, type, enable)
+     |      Set the schedule type.  If enable is True, then also include
+     |      the enable bit in the schedule.
+     |      
+     |      :param type: Type of schedule.  See the class PDSchedule for types
+     |      :param enable: If True, also enable the schedule
+     |      :return: The Schedule Type
+     |  
+     |  helper_advanced_schedule_set_week(self, week)
+     |      Set the week.
+     |      
+     |      :param week: Array of Days to set
+     |      :return: The week
+     |  
+     |  helper_advanced_schedule_type_string(self, schedule)
+     |      Helper function to return the type string
+     |      
+     |      :param schedule: Schedule
+     |      :return: Type string
+     |  
+     |  helper_advanced_schedule_week_string(self, week)
+     |      Helper function to get the week string
+     |      
+     |      :param week: Schedule week
+     |      :return: Week String such as "Mon, Tues, Fri"
      |  
      |  helper_asset_data_read(self)
      |      Helper function that reads the entire asset data string by combining chunks using
@@ -573,6 +727,21 @@ CLASSES
      |      
      |      :return: total operating hours as a value
      |  
+     |  helper_read_advanced_schedules(self)
+     |      Helper function to read all the advanced schedules and return them as a list of schedules
+     |      
+     |      :return: A list of PDAdvancedScheduleTuple
+     |  
+     |  helper_read_holidays(self)
+     |      Helper function to reall all the holidays and return them as a list of holidays
+     |      
+     |      :return: A list of PDHolidayTuple
+     |  
+     |  helper_read_schedules(self)
+     |      Helper function to read all the schedules and return them as a list of schedules
+     |      
+     |      :return: A list of PDScheduleTuple
+     |  
      |  helper_self_diagnosis_status_text(self)
      |      Performs "command_self_diagnosis_status_read" and formats the reply into
      |      a string of the decoded error code(s).
@@ -648,6 +817,162 @@ CLASSES
      |  reply_destination_address = 0
      |  
      |  reply_message_type = 0
+    
+    class PDAdvancedScheduleTuple(__builtin__.tuple)
+     |  PDAdvancedScheduleTuple(status, program_no, event, hour, minute, input, week, type, picture_mode, year, month, day, order, extension_1, extension_2, extension_3)
+     |  
+     |  Method resolution order:
+     |      PDAdvancedScheduleTuple
+     |      __builtin__.tuple
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __getnewargs__(self)
+     |      Return self as a plain tuple.  Used by copy and pickle.
+     |  
+     |  __getstate__(self)
+     |      Exclude the OrderedDict from pickling
+     |  
+     |  __repr__(self)
+     |      Return a nicely formatted representation string
+     |  
+     |  _asdict(self)
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  _replace(_self, **kwds)
+     |      Return a new PDAdvancedScheduleTuple object replacing specified fields with new values
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  _make(cls, iterable, new=<built-in method __new__ of type object>, len=<built-in function len>) from __builtin__.type
+     |      Make a new PDAdvancedScheduleTuple object from a sequence or iterable
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  __new__(_cls, status, program_no, event, hour, minute, input, week, type, picture_mode, year, month, day, order, extension_1, extension_2, extension_3)
+     |      Create new instance of PDAdvancedScheduleTuple(status, program_no, event, hour, minute, input, week, type, picture_mode, year, month, day, order, extension_1, extension_2, extension_3)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  day
+     |      Alias for field number 11
+     |  
+     |  event
+     |      Alias for field number 2
+     |  
+     |  extension_1
+     |      Alias for field number 13
+     |  
+     |  extension_2
+     |      Alias for field number 14
+     |  
+     |  extension_3
+     |      Alias for field number 15
+     |  
+     |  hour
+     |      Alias for field number 3
+     |  
+     |  input
+     |      Alias for field number 5
+     |  
+     |  minute
+     |      Alias for field number 4
+     |  
+     |  month
+     |      Alias for field number 10
+     |  
+     |  order
+     |      Alias for field number 12
+     |  
+     |  picture_mode
+     |      Alias for field number 8
+     |  
+     |  program_no
+     |      Alias for field number 1
+     |  
+     |  status
+     |      Alias for field number 0
+     |  
+     |  type
+     |      Alias for field number 7
+     |  
+     |  week
+     |      Alias for field number 6
+     |  
+     |  year
+     |      Alias for field number 9
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  _fields = ('status', 'program_no', 'event', 'hour', 'minute', 'input',...
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from __builtin__.tuple:
+     |  
+     |  __add__(...)
+     |      x.__add__(y) <==> x+y
+     |  
+     |  __contains__(...)
+     |      x.__contains__(y) <==> y in x
+     |  
+     |  __eq__(...)
+     |      x.__eq__(y) <==> x==y
+     |  
+     |  __ge__(...)
+     |      x.__ge__(y) <==> x>=y
+     |  
+     |  __getattribute__(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  __getitem__(...)
+     |      x.__getitem__(y) <==> x[y]
+     |  
+     |  __getslice__(...)
+     |      x.__getslice__(i, j) <==> x[i:j]
+     |      
+     |      Use of negative indices is not supported.
+     |  
+     |  __gt__(...)
+     |      x.__gt__(y) <==> x>y
+     |  
+     |  __hash__(...)
+     |      x.__hash__() <==> hash(x)
+     |  
+     |  __iter__(...)
+     |      x.__iter__() <==> iter(x)
+     |  
+     |  __le__(...)
+     |      x.__le__(y) <==> x<=y
+     |  
+     |  __len__(...)
+     |      x.__len__() <==> len(x)
+     |  
+     |  __lt__(...)
+     |      x.__lt__(y) <==> x<y
+     |  
+     |  __mul__(...)
+     |      x.__mul__(n) <==> x*n
+     |  
+     |  __ne__(...)
+     |      x.__ne__(y) <==> x!=y
+     |  
+     |  __rmul__(...)
+     |      x.__rmul__(n) <==> n*x
+     |  
+     |  count(...)
+     |      T.count(value) -> integer -- return number of occurrences of value
+     |  
+     |  index(...)
+     |      T.index(value, [start, [stop]]) -> integer -- return first index of value.
+     |      Raises ValueError if the value is not present.
     
     class PDAutoTileMatrixTuple(__builtin__.tuple)
      |  PDAutoTileMatrixTuple(h_monitors, v_monitors, pattern_id, current_input_select, tile_matrix_mem)
@@ -1134,6 +1459,144 @@ CLASSES
      |  Data and other attributes defined here:
      |  
      |  _fields = ('status', 'log_number', 'input', 'signal_h_resolution', 'si...
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from __builtin__.tuple:
+     |  
+     |  __add__(...)
+     |      x.__add__(y) <==> x+y
+     |  
+     |  __contains__(...)
+     |      x.__contains__(y) <==> y in x
+     |  
+     |  __eq__(...)
+     |      x.__eq__(y) <==> x==y
+     |  
+     |  __ge__(...)
+     |      x.__ge__(y) <==> x>=y
+     |  
+     |  __getattribute__(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  __getitem__(...)
+     |      x.__getitem__(y) <==> x[y]
+     |  
+     |  __getslice__(...)
+     |      x.__getslice__(i, j) <==> x[i:j]
+     |      
+     |      Use of negative indices is not supported.
+     |  
+     |  __gt__(...)
+     |      x.__gt__(y) <==> x>y
+     |  
+     |  __hash__(...)
+     |      x.__hash__() <==> hash(x)
+     |  
+     |  __iter__(...)
+     |      x.__iter__() <==> iter(x)
+     |  
+     |  __le__(...)
+     |      x.__le__(y) <==> x<=y
+     |  
+     |  __len__(...)
+     |      x.__len__() <==> len(x)
+     |  
+     |  __lt__(...)
+     |      x.__lt__(y) <==> x<y
+     |  
+     |  __mul__(...)
+     |      x.__mul__(n) <==> x*n
+     |  
+     |  __ne__(...)
+     |      x.__ne__(y) <==> x!=y
+     |  
+     |  __rmul__(...)
+     |      x.__rmul__(n) <==> n*x
+     |  
+     |  count(...)
+     |      T.count(value) -> integer -- return number of occurrences of value
+     |  
+     |  index(...)
+     |      T.index(value, [start, [stop]]) -> integer -- return first index of value.
+     |      Raises ValueError if the value is not present.
+    
+    class PDHolidayTuple(__builtin__.tuple)
+     |  PDHolidayTuple(status, id, type, year, month, day, week_of_month, day_of_week, end_month, end_day)
+     |  
+     |  Method resolution order:
+     |      PDHolidayTuple
+     |      __builtin__.tuple
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __getnewargs__(self)
+     |      Return self as a plain tuple.  Used by copy and pickle.
+     |  
+     |  __getstate__(self)
+     |      Exclude the OrderedDict from pickling
+     |  
+     |  __repr__(self)
+     |      Return a nicely formatted representation string
+     |  
+     |  _asdict(self)
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  _replace(_self, **kwds)
+     |      Return a new PDHolidayTuple object replacing specified fields with new values
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  _make(cls, iterable, new=<built-in method __new__ of type object>, len=<built-in function len>) from __builtin__.type
+     |      Make a new PDHolidayTuple object from a sequence or iterable
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  __new__(_cls, status, id, type, year, month, day, week_of_month, day_of_week, end_month, end_day)
+     |      Create new instance of PDHolidayTuple(status, id, type, year, month, day, week_of_month, day_of_week, end_month, end_day)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  day
+     |      Alias for field number 5
+     |  
+     |  day_of_week
+     |      Alias for field number 7
+     |  
+     |  end_day
+     |      Alias for field number 9
+     |  
+     |  end_month
+     |      Alias for field number 8
+     |  
+     |  id
+     |      Alias for field number 1
+     |  
+     |  month
+     |      Alias for field number 4
+     |  
+     |  status
+     |      Alias for field number 0
+     |  
+     |  type
+     |      Alias for field number 2
+     |  
+     |  week_of_month
+     |      Alias for field number 6
+     |  
+     |  year
+     |      Alias for field number 3
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  _fields = ('status', 'id', 'type', 'year', 'month', 'day', 'week_of_mo...
      |  
      |  ----------------------------------------------------------------------
      |  Methods inherited from __builtin__.tuple:
@@ -1810,6 +2273,160 @@ CLASSES
      |      T.index(value, [start, [stop]]) -> integer -- return first index of value.
      |      Raises ValueError if the value is not present.
     
+    class PDSchedule
+     |  This class holds the definitions values of schedule items
+     |  
+     |  Data and other attributes defined here:
+     |  
+     |  Enabled = 4
+     |  
+     |  EveryDay = 1
+     |  
+     |  Friday = 16
+     |  
+     |  Holidays = 32
+     |  
+     |  Monday = 1
+     |  
+     |  OffEvent = 2
+     |  
+     |  OnEvent = 1
+     |  
+     |  OneDay = 64
+     |  
+     |  Saturday = 32
+     |  
+     |  SpecificDays = 2
+     |  
+     |  Sunday = 64
+     |  
+     |  Thursday = 8
+     |  
+     |  Tuesday = 2
+     |  
+     |  Wednesday = 4
+     |  
+     |  Weekdays = 8
+     |  
+     |  Weekends = 16
+    
+    PDScheduleEnableDisableTuple = class PDScheduleEnableDisable(__builtin__.tuple)
+     |  PDScheduleEnableDisable(status, program_no, enable_disable)
+     |  
+     |  Method resolution order:
+     |      PDScheduleEnableDisable
+     |      __builtin__.tuple
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __getnewargs__(self)
+     |      Return self as a plain tuple.  Used by copy and pickle.
+     |  
+     |  __getstate__(self)
+     |      Exclude the OrderedDict from pickling
+     |  
+     |  __repr__(self)
+     |      Return a nicely formatted representation string
+     |  
+     |  _asdict(self)
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  _replace(_self, **kwds)
+     |      Return a new PDScheduleEnableDisable object replacing specified fields with new values
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  _make(cls, iterable, new=<built-in method __new__ of type object>, len=<built-in function len>) from __builtin__.type
+     |      Make a new PDScheduleEnableDisable object from a sequence or iterable
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  __new__(_cls, status, program_no, enable_disable)
+     |      Create new instance of PDScheduleEnableDisable(status, program_no, enable_disable)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  enable_disable
+     |      Alias for field number 2
+     |  
+     |  program_no
+     |      Alias for field number 1
+     |  
+     |  status
+     |      Alias for field number 0
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  _fields = ('status', 'program_no', 'enable_disable')
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from __builtin__.tuple:
+     |  
+     |  __add__(...)
+     |      x.__add__(y) <==> x+y
+     |  
+     |  __contains__(...)
+     |      x.__contains__(y) <==> y in x
+     |  
+     |  __eq__(...)
+     |      x.__eq__(y) <==> x==y
+     |  
+     |  __ge__(...)
+     |      x.__ge__(y) <==> x>=y
+     |  
+     |  __getattribute__(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  __getitem__(...)
+     |      x.__getitem__(y) <==> x[y]
+     |  
+     |  __getslice__(...)
+     |      x.__getslice__(i, j) <==> x[i:j]
+     |      
+     |      Use of negative indices is not supported.
+     |  
+     |  __gt__(...)
+     |      x.__gt__(y) <==> x>y
+     |  
+     |  __hash__(...)
+     |      x.__hash__() <==> hash(x)
+     |  
+     |  __iter__(...)
+     |      x.__iter__() <==> iter(x)
+     |  
+     |  __le__(...)
+     |      x.__le__(y) <==> x<=y
+     |  
+     |  __len__(...)
+     |      x.__len__() <==> len(x)
+     |  
+     |  __lt__(...)
+     |      x.__lt__(y) <==> x<y
+     |  
+     |  __mul__(...)
+     |      x.__mul__(n) <==> x*n
+     |  
+     |  __ne__(...)
+     |      x.__ne__(y) <==> x!=y
+     |  
+     |  __rmul__(...)
+     |      x.__rmul__(n) <==> n*x
+     |  
+     |  count(...)
+     |      T.count(value) -> integer -- return number of occurrences of value
+     |  
+     |  index(...)
+     |      T.index(value, [start, [stop]]) -> integer -- return first index of value.
+     |      Raises ValueError if the value is not present.
+    
     class PDScheduleTuple(__builtin__.tuple)
      |  PDScheduleTuple(status, program_no, turn_on_hour, turn_on_minute, turn_off_hour, turn_off_minute, timer_input, week_setting, option, picture_mode, extension_1, extension_2, extension_3, extension_4, extension_5, extension_6, extension_7)
      |  
@@ -2091,6 +2708,120 @@ CLASSES
      |  index(...)
      |      T.index(value, [start, [stop]]) -> integer -- return first index of value.
      |      Raises ValueError if the value is not present.
+    
+    class PDWeekendTuple(__builtin__.tuple)
+     |  PDWeekendTuple(status, weekend)
+     |  
+     |  Method resolution order:
+     |      PDWeekendTuple
+     |      __builtin__.tuple
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __getnewargs__(self)
+     |      Return self as a plain tuple.  Used by copy and pickle.
+     |  
+     |  __getstate__(self)
+     |      Exclude the OrderedDict from pickling
+     |  
+     |  __repr__(self)
+     |      Return a nicely formatted representation string
+     |  
+     |  _asdict(self)
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  _replace(_self, **kwds)
+     |      Return a new PDWeekendTuple object replacing specified fields with new values
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  _make(cls, iterable, new=<built-in method __new__ of type object>, len=<built-in function len>) from __builtin__.type
+     |      Make a new PDWeekendTuple object from a sequence or iterable
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  __new__(_cls, status, weekend)
+     |      Create new instance of PDWeekendTuple(status, weekend)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      Return a new OrderedDict which maps field names to their values
+     |  
+     |  status
+     |      Alias for field number 0
+     |  
+     |  weekend
+     |      Alias for field number 1
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  _fields = ('status', 'weekend')
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from __builtin__.tuple:
+     |  
+     |  __add__(...)
+     |      x.__add__(y) <==> x+y
+     |  
+     |  __contains__(...)
+     |      x.__contains__(y) <==> y in x
+     |  
+     |  __eq__(...)
+     |      x.__eq__(y) <==> x==y
+     |  
+     |  __ge__(...)
+     |      x.__ge__(y) <==> x>=y
+     |  
+     |  __getattribute__(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  __getitem__(...)
+     |      x.__getitem__(y) <==> x[y]
+     |  
+     |  __getslice__(...)
+     |      x.__getslice__(i, j) <==> x[i:j]
+     |      
+     |      Use of negative indices is not supported.
+     |  
+     |  __gt__(...)
+     |      x.__gt__(y) <==> x>y
+     |  
+     |  __hash__(...)
+     |      x.__hash__() <==> hash(x)
+     |  
+     |  __iter__(...)
+     |      x.__iter__() <==> iter(x)
+     |  
+     |  __le__(...)
+     |      x.__le__(y) <==> x<=y
+     |  
+     |  __len__(...)
+     |      x.__len__() <==> len(x)
+     |  
+     |  __lt__(...)
+     |      x.__lt__(y) <==> x<y
+     |  
+     |  __mul__(...)
+     |      x.__mul__(n) <==> x*n
+     |  
+     |  __ne__(...)
+     |      x.__ne__(y) <==> x!=y
+     |  
+     |  __rmul__(...)
+     |      x.__rmul__(n) <==> n*x
+     |  
+     |  count(...)
+     |      T.count(value) -> integer -- return number of occurrences of value
+     |  
+     |  index(...)
+     |      T.index(value, [start, [stop]]) -> integer -- return first index of value.
+     |      Raises ValueError if the value is not present.
 
 FUNCTIONS
     retry(function)
@@ -2152,6 +2883,9 @@ DATA
     OPCODE_COLOR_SYSTEM = 545
     OPCODE_COMMAND_TRANSFER = 4431
     OPCODE_COMPUTE_MODULE_AUTO_POWER_ON = 4477
+    OPCODE_COMPUTE_MODULE_AUTO_SHUTDOWN = 4535
+    OPCODE_COMPUTE_MODULE_FAN_POWER_MODE = 4533
+    OPCODE_COMPUTE_MODULE_FAN_POWER_STATUS = 4534
     OPCODE_COMPUTE_MODULE_IR_SIGNAL = 4479
     OPCODE_COMPUTE_MODULE_MONITOR_CONTROL = 4480
     OPCODE_COMPUTE_MODULE_POWER_SUPPLY = 4476
@@ -2452,9 +3186,9 @@ DATA
     PD_POWER_STATES = {'Error': 0, 'Off': 4, 'On': 1, 'Standby': 2, 'Suspe...
     commandStatusReturnedError = PDCommandStatusReturnedError('Command sta...
     connect_timeout = 2.0
-    print_function = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0)...
+    nullMessageReply = PDNullMessageReplyError('NULL message reply (monito...
+    replyTimeout = PDTimeoutError('Reply timeout (no reply within timeout ...
     reply_timeout = 7.0
     unexpectedReply = PDUnexpectedReplyError('Unexpected reply received',)
-    unicode_literals = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', ...
 
 

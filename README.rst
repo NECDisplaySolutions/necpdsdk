@@ -22,7 +22,7 @@ License
 --------------
 The MIT License
 
-Copyright (c) 2017 NEC Display Solutions, Ltd.
+Copyright (c) 2017-2018 NEC Display Solutions, Ltd.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -44,4 +44,9 @@ SOFTWARE.
 
 What's New
 -----------
-Add support for running on Python 3.
+Added scheduling functions
+Added CPU Temperature based cooling fan control
+Added "command_ip_address_read" function to read the IP address of the display
+Added OPCODE definitions for new COMPUTE MODULE FAN CONTROL and AUTO SHUTDOWN
+Added new IR remote keys definitions
+Added new OPCODES definitions and controls.txt

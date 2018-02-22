@@ -4,7 +4,7 @@ NAME
     protocol
 
 FILE
-    \nec_pd_sdk\protocol.py
+    /home/pi/development/necpdsdk/nec_pd_sdk/protocol.py
 
 DESCRIPTION
     protocol.py - Lower level protocol handling functions for communicating with NEC large-screen displays
@@ -440,7 +440,6 @@ FUNCTIONS
 DATA
     commandStatusReturnedError = PDCommandStatusReturnedError('Command sta...
     nullMessageReply = PDNullMessageReplyError('NULL message reply (monito...
-    print_function = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0)...
     replyTimeout = PDTimeoutError('Reply timeout (no reply within timeout ...
     unexpectedReply = PDUnexpectedReplyError('Unexpected reply received',)
 

@@ -4,11 +4,11 @@ NAME
     constants
 
 FILE
-   \nec_pd_sdk\constants.py
+    /home/pi/development/necpdsdk/nec_pd_sdk/constants.py
 
 DESCRIPTION
     constants.py - Various constants used for communicating with NEC large-screen displays.
-    Revision: 170322
+    Revision: 180220
 
 DATA
     DISPLAY_DIAGNOSTIC_ERROR_CODES = {0: 'Normal', 112: 'Standby-power +3....
@@ -65,6 +65,9 @@ DATA
     OPCODE_COLOR_SYSTEM = 545
     OPCODE_COMMAND_TRANSFER = 4431
     OPCODE_COMPUTE_MODULE_AUTO_POWER_ON = 4477
+    OPCODE_COMPUTE_MODULE_AUTO_SHUTDOWN = 4535
+    OPCODE_COMPUTE_MODULE_FAN_POWER_MODE = 4533
+    OPCODE_COMPUTE_MODULE_FAN_POWER_STATUS = 4534
     OPCODE_COMPUTE_MODULE_IR_SIGNAL = 4479
     OPCODE_COMPUTE_MODULE_MONITOR_CONTROL = 4480
     OPCODE_COMPUTE_MODULE_POWER_SUPPLY = 4476

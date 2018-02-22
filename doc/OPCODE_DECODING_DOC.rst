@@ -4,7 +4,7 @@ NAME
     opcode_decoding - opcode_decoding.py - Tools for working with opcodes and opcode values
 
 FILE
-    \nec_pd_sdk\opcode_decoding.py
+    /home/pi/development/necpdsdk/nec_pd_sdk/opcode_decoding.py
 
 FUNCTIONS
     get_opcode_list()
