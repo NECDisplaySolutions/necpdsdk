@@ -4,7 +4,7 @@ Revision: 170322
 """
 #
 #
-# Copyright (C) 2016-17 NEC Display Solutions, Ltd
+# Copyright (C) 2016-18 NEC Display Solutions, Ltd
 # written by Will Hollingworth <whollingworth at necdisplay.com>
 # See LICENSE.rst for details.
 #
