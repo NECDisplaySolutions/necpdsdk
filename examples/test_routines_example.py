@@ -1,10 +1,10 @@
 """test_raspberry_pi.py - Test routines and sample code for communicating via LAN or RS232 with NEC large-screen displays
 using the NEC PD SDK.
-Revision: 170317
+Revision: 180220
 """
 #
 #
-# Copyright (C) 2016-17 NEC Display Solutions, Ltd
+# Copyright (C) 2016-18 NEC Display Solutions, Ltd
 # written by Will Hollingworth <whollingworth at necdisplay.com>
 # See LICENSE.rst for details.
 #
@@ -38,6 +38,14 @@ def do_main_tests(pd):
         print("Testing: command_serial_number_read")
         value = pd.command_serial_number_read()
         print("command_serial_number_read value:", value)
+
+        print("Testing: command_lan_mac_address_read")
+        value = pd.command_lan_mac_address_read()
+        print("command_lan_mac_address_read value:", value[0])
+
+        print("Testing: command_ip_address_read")
+        value = pd.command_ip_address_read()
+        print("command_ip_address_read value:", value[0])
 
         print("Testing: helper_get_power_on_hours")
         print("power on hours: ", pd.helper_get_power_on_hours())

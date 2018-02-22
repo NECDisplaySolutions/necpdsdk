@@ -4,7 +4,7 @@
 """
 #
 #
-# Copyright (C) 2016-17 NEC Display Solutions, Ltd
+# Copyright (C) 2016-18 NEC Display Solutions, Ltd
 # written by Will Hollingworth <whollingworth at necdisplay.com>
 # See LICENSE.rst for details.
 
@@ -1156,6 +1156,56 @@ class NECPD(object):
                 if offset < len(reply_data):
                     mac += "-"
             return mac, ipv
+        else:
+            logging.error('unexpected reply length: %i (expected >=10)', len(reply_data))
+            raise unexpectedReply
+
+    @retry
+    def command_ip_address_read(self):
+        """
+        Reads the LAN IP address of the display.
+        Raises "PDCommandStatusReturnedError" if the returned status is not 'No Error'.
+
+        :return: a string of the IP address with decimal numbers and using "." separators
+        """
+        logging.debug('')
+        send_data = []
+        send_data.extend(ascii_encode_value_4_bytes(0xC22A))
+        send_data.extend(ascii_encode_value_2_bytes(0x45))
+        write_command(self.f, send_data, self.destination_address, 0x41)
+        reply_data, reply_message_type, reply_destination_address = read_command_reply(self.f, True)
+        if len(reply_data) >= 10:
+            if reply_message_type != 0x42:
+                logging.error('unexpected reply received')
+                raise unexpectedReply
+            # LAN read reply command
+            if reply_data[0:4] != ascii_encode_value_4_bytes(0xC32A):
+                logging.error('unexpected reply received')
+                raise unexpectedReply
+            offset = 4
+            # status_byte
+            parameter_len = 2
+            status_byte = ascii_decode_value(reply_data[offset:offset + parameter_len])
+            if status_byte != 0:
+                logging.error('reply status is not 0')
+                raise commandStatusReturnedError
+            offset += parameter_len
+            if reply_data[6:8] != ascii_encode_value_2_bytes(0x45):
+                logging.error('unexpected reply received')
+                raise unexpectedReply
+            offset += 2
+            # IPV
+            parameter_len = 2
+            ipv = ascii_decode_value(reply_data[offset:offset + parameter_len])
+            offset += parameter_len
+            ip = ""
+            while offset+1 < len(reply_data):
+                x = ascii_decode_value(reply_data[offset:offset + 2])
+                ip += format(x, "d")
+                offset += 2
+                if offset < len(reply_data):
+                    ip += "."
+            return ip, ipv
         else:
             logging.error('unexpected reply length: %i (expected >=10)', len(reply_data))
             raise unexpectedReply

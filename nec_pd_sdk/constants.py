@@ -1,9 +1,9 @@
 """constants.py - Various constants used for communicating with NEC large-screen displays.
-Revision: 170322
+Revision: 180220
 """
 #
 #
-# Copyright (C) 2016-17 NEC Display Solutions, Ltd
+# Copyright (C) 2016-18 NEC Display Solutions, Ltd
 # written by Will Hollingworth <whollingworth at necdisplay.com>
 # See LICENSE.rst for details.
 #
@@ -355,10 +355,15 @@ OPCODE_DP_POWER_SETTING = 0x1183
 OPCODE_DUAL_LINK_HDCP_SWITCH = 0x1184
 OPCODE_INTERNAL_TOUCH = 0x1185
 OPCODE_HDMI_SW_THROUGH = 0x1186
-OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_ENABLE = 0x119B
-OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_START_UP_TIME = 0x119C
-OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_PERIOD_TIME = 0x119D
-OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_RESET = 0x119E
+OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_ENABLE = 0x119b
+OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_START_UP_TIME = 0x119c
+OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_PERIOD_TIME = 0x119d
+OPCODE_COMPUTE_MODULE_WATCHDOG_TIMER_RESET = 0x119e
+
+OPCODE_COMPUTE_MODULE_FAN_POWER_MODE = 0x11b5
+OPCODE_COMPUTE_MODULE_FAN_POWER_STATUS = 0x11b6
+OPCODE_COMPUTE_MODULE_AUTO_SHUTDOWN = 0x11b7
+
 OPCODE_TOTAL_OPERATING_TIME__UPPER___MINUTES___READ_ONLY_ = 0x11fa
 OPCODE_TOTAL_OPERATING_TIME__LOWER___MINUTES___READ_ONLY_ = 0x11fb
 OPCODE_OPERATING_TIME_ON__UPPER___MINUTES___READ_ONLY_ = 0x11fe
@@ -397,6 +402,8 @@ PD_IR_COMMAND_CODES = {
     'ch-': 0x32,
     'guide': 0x34,
     'mute': 0x1b,
+    'still': 0x27,
+    'capture': 0x28,
     'dvi': 0x2d,
     'displayport': 0x55,
     'vga': 0x04,
@@ -412,6 +419,8 @@ PD_IR_COMMAND_CODES = {
     'hdmi2': 0x58,
     'hdmi3': 0x59,
     'hdmi4': 0x5a,
+    'displayport1': 0x66,
+    'displayport2': 0x67,
     'media_player': 0x68,
     'compute_module': 0x69,
     'picture_mode': 0x1d,
