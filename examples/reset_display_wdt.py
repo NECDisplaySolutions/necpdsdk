@@ -68,7 +68,7 @@ file before the line with the text "exit 0":
 sudo python /usr/share/NEC/reset_display_wdt.py &
 
 
-Revision: 180221
+Revision: 180222
 """
 
 
@@ -109,7 +109,7 @@ fan_on_minimum_duration = 30
 enable_debug_logging = False
 
 
-# fan control modes
+# fan control modes: OFF=Fan always on. ON=Fan always on. AUTO=Fan turns on and off with CM power.
 FAN_MODE_OFF = 0x0001
 FAN_MODE_ON = 0x0002
 FAN_MODE_AUTO = 0x0003
@@ -188,8 +188,8 @@ def main():
                 time_wdt_reset = time.time()
             if use_fan_control:
                 # turn the fan on first thing
-                error = set_fan_power_mode(pd, FAN_MODE_ON)
-                current_fan_state = FAN_MODE_ON
+                error = set_fan_power_mode(pd, FAN_MODE_AUTO)
+                current_fan_state = FAN_MODE_AUTO
                 time_fan_turned_on = time.time()
                 if error == -1:
                     # the display's firmware doesn't support this command so disable trying again
@@ -218,10 +218,10 @@ def main():
                             logging.info("Current temperature is %s and fan state is %s" % (temperature,
                                                                                             current_fan_state))
                             if temperature >= high_temperature_limit:
-                                if current_fan_state != FAN_MODE_ON:
+                                if current_fan_state != FAN_MODE_AUTO:
                                     logging.info("Turning fan on")
-                                    set_fan_power_mode(pd, FAN_MODE_ON)
-                                    current_fan_state = FAN_MODE_ON
+                                    set_fan_power_mode(pd, FAN_MODE_AUTO)
+                                    current_fan_state = FAN_MODE_AUTO
                                     time_fan_turned_on = time.time()
                             if temperature <= low_temperature_limit_on_to_off:
                                 if current_fan_state != FAN_MODE_OFF:
