@@ -2,6 +2,11 @@ CHANGELOG
 
 All changes to this project are documented in this file.
 -----------
+
+Version 18.2.231
+================
+585be3e (origin/fan_control, fan_control) Modified fan control to use FAN_MODE_AUTO instead of FAN_MODE_ON so that if the fan is on when the CM power is turned off, the fan will also turn off.
+
 Version 18.2.221
 ================
 d722224 Updates for new release
