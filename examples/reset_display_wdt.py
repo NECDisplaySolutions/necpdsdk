@@ -68,7 +68,7 @@ file before the line with the text "exit 0":
 sudo python /usr/share/NEC/reset_display_wdt.py &
 
 
-Revision: 180222
+Revision: 180224
 """
 
 
@@ -79,7 +79,6 @@ Revision: 180222
 import time
 import logging
 import os
-# import random
 from nec_pd_sdk.nec_pd_sdk import NECPD
 from nec_pd_sdk.protocol import PDError
 from nec_pd_sdk.protocol import PDUnexpectedReplyError
@@ -116,7 +115,6 @@ FAN_MODE_AUTO = 0x0003
 
 
 def get_cpu_temperature():
-    # return random.randint(50, 65)
     res = os.popen('vcgencmd measure_temp').readline()
     return float(res.replace("temp=", "").replace("'C\n", ""))
 
@@ -176,6 +174,8 @@ def main():
     logging.info("high_temperature_limit %s" % high_temperature_limit)
     logging.info("low_temperature_limit_on_to_off %s" % low_temperature_limit_on_to_off)
     logging.info("polling_interval %s" % polling_interval)
+    time_since_wdt_reset = 0
+    time_since_fan_on = 0
 
     try:
         # first try and open communications. Any errors here should be reported and terminate.
@@ -185,16 +185,16 @@ def main():
             if use_reset_wdt:
                 # reset the WDT first thing
                 reset_wdt(pd)
-                time_wdt_reset = time.time()
             if use_fan_control:
                 # turn the fan on first thing
                 error = set_fan_power_mode(pd, FAN_MODE_AUTO)
-                current_fan_state = FAN_MODE_AUTO
-                time_fan_turned_on = time.time()
                 if error == -1:
                     # the display's firmware doesn't support this command so disable trying again
+                    logging.info("fan control not supported by the display so disabling")
                     use_fan_control = False
                     polling_interval = wdt_interval
+                else:
+                    current_fan_state = FAN_MODE_AUTO
             pd.close()
 
             # next do an infinite loop of resetting the WDT and/or fan control.
@@ -202,36 +202,51 @@ def main():
                 try:
                     logging.info("Waiting for %s seconds" % polling_interval)
                     time.sleep(polling_interval)
-                    pd = NECPD.open(port)
+
                     if use_reset_wdt:
                         if polling_interval == wdt_interval:
-                            reset_wdt()
+                            pd = NECPD.open(port)
+                            reset_wdt(pd)
+                            pd.close()
                         else:
+                            time_since_wdt_reset += polling_interval
                             # if polling rapidly (because 'use_fan_control') then only send the WDT reset when
                             # wdt_interval is exceeded
-                            if (time.time() - time_wdt_reset) >= wdt_interval:
+                            if time_since_wdt_reset >= wdt_interval:
+                                pd = NECPD.open(port)
                                 reset_wdt(pd)
-                                time_wdt_reset = time.time()
+                                pd.close()
+                                time_since_wdt_reset = 0
                     if use_fan_control:
                         try:
                             temperature = get_cpu_temperature()
                             logging.info("Current temperature is %s and fan state is %s" % (temperature,
                                                                                             current_fan_state))
+                            if current_fan_state == FAN_MODE_AUTO:
+                                time_since_fan_on += polling_interval
                             if temperature >= high_temperature_limit:
                                 if current_fan_state != FAN_MODE_AUTO:
                                     logging.info("Turning fan on")
+                                    pd = NECPD.open(port)
                                     set_fan_power_mode(pd, FAN_MODE_AUTO)
+                                    pd.close()
                                     current_fan_state = FAN_MODE_AUTO
-                                    time_fan_turned_on = time.time()
+                                    time_since_fan_on = 0
                             if temperature <= low_temperature_limit_on_to_off:
                                 if current_fan_state != FAN_MODE_OFF:
-                                    logging.info("time since turned on = %s" % (time.time() - time_fan_turned_on))
-                                    if (time.time() - time_fan_turned_on) > fan_on_minimum_duration:
+                                    logging.info("time since turned on = %s" % time_since_fan_on)
+                                    if time_since_fan_on >= fan_on_minimum_duration:
                                         logging.info("Turning fan off")
+                                        pd = NECPD.open(port)
                                         set_fan_power_mode(pd, FAN_MODE_OFF)
+                                        pd.close()
                                         current_fan_state = FAN_MODE_OFF
                                     else:
-                                        logging.info("Fan not turned off because minimum time")
+                                        logging.info("Fan not turned off because fan on for %s and minimum time is %s"
+                                                     % (time_since_fan_on,fan_on_minimum_duration))
+                            else:
+                                logging.info("temperature > low_temperature_limit_on_to_off (%s)"
+                                             % low_temperature_limit_on_to_off)
                         except ValueError:
                             print("Unable to read cpu temperature")
                             logging.error('Unable to read cpu temperature')
@@ -239,13 +254,10 @@ def main():
                     # catch any connection errors here so it continues regardless.
                     print("PDError:", msg)
                     logging.error('main loop PDError %s ', msg)
+                    pd.close()
                 except KeyboardInterrupt:
                     logging.info("KeyboardInterrupt")
                     return
-                finally:
-                    # make sure to always close.
-                    # logging.warning('close in finally in main loop')
-                    pd.close()
 
         except PDError as msg:
             logging.error('initial check PDError %s ', msg)
@@ -253,7 +265,6 @@ def main():
         finally:
             # make sure to always close.
             logging.warning('closing port because error during initial check')
-            # print("closing port because error during initial check ")
             pd.close()
     except PDError as msg:
         print("Connection error PDError:", msg)
